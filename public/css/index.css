@@ -1,0 +1,24 @@
+:root {
+    --top-bar-space: 5%;
+    --action-bar-space: 5%;
+    --side-bar-space: 15%;
+    --background-color: #1c252c;
+    --top-bar-color: #192229;
+    --border-color: #0e1316;
+    --code-color: rgb(37, 50, 59);
+    --line-color: rgb(86, 116, 138);
+
+    font-size: 125%;
+}
+
+body {
+    margin: 0px;
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--background-color);
+
+    font-family: monospace;
+    color: white;
+
+    overflow: hidden;
+}
