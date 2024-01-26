@@ -1,7 +1,5 @@
 :root {
-    --top-bar-space: 5%;
-    --action-bar-space: 5%;
-    --side-bar-space: 15%;
+    --top-bar-space: 7.5%;
     --background-color: #1c252c;
     --top-bar-color: #192229;
     --border-color: #0e1316;
@@ -22,3 +20,15 @@ body {
 
     overflow: hidden;
 }
+
+#tool-bar {
+    background-color: var(--top-bar-color);
+    height: var(--top-bar-space);
+    width: 100vw;
+}
+
+#line-canvas {
+    height: calc(100vh - var(--top-bar-space));
+    width: 100vw;
+}
+
