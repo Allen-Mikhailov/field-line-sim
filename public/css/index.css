@@ -27,8 +27,11 @@ body {
     width: 100vw;
 }
 
-#line-canvas {
+.canvas {
     height: calc(100vh - var(--top-bar-space));
     width: 100vw;
+
+    position: absolute;
+    top: var(--top-bar-space);
 }
 
