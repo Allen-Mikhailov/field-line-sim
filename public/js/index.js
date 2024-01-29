@@ -13,6 +13,12 @@ let unitPerPixel
 let hWidth, hHeight
 let canvas_bounds
 
+let step_distance = .005
+let record_steps = 60
+let steps_per_record = 200
+
+let neg_charges = []
+
 
 function update_screen_size()
 {
@@ -43,22 +49,35 @@ const decor_ctx = decor_canvas.getContext("2d")
 const k = 1 //8.99 * Math.pow(10, 9)
 const nano = Math.pow(10, -9)
 
-const point_charge_size = 10
+const point_charge_size = 30
 const point_charge_start = point_charge_size/unitPerPixel
 const charge_density = 10
 const close_spawn_distance = .01
 
-const arrow_size = 20
+const arrow_size = 10
 const arrow_angle = Math.PI/4
 
 const charges = {
     "test-charge": {
         x: 0,
         y: 0,
-        q: 1,
+        q: -1,
         type: 0,
-    }
+    },
 }
+
+for (let i = 0; i < 3; i++)
+{
+    const newCharge = {
+        x: (Math.random()-.5)*2 * 35,
+        y: (Math.random()-.5)*2 * 20,
+        q: 1,
+        type: 0
+    }
+    charges[""+i] = newCharge
+}
+
+console.log(charges)
 
 function getScreenPos(x, y)
 {
@@ -66,6 +85,11 @@ function getScreenPos(x, y)
         x*unitPerPixel+hWidth, 
         hHeight-y*unitPerPixel
     ]
+}
+
+function getScreenPosA([x, y])
+{
+    return getScreenPos(x, y)
 }
 
 function getSpacePos(x, y)
@@ -78,7 +102,7 @@ function getSpacePos(x, y)
 
 function getChargeColor(q)
 {
-    return q > 0?"#f00":"#000"
+    return q > 0?"#00f":"#f00"
 }
 
 function drawArrow(context, sx, sy, angle, style)
@@ -115,6 +139,7 @@ function drawCharges()
             // Point Charge
             case 0:
                 ctx.strokeStyle = getChargeColor(obj.q)
+                ctx.lineWidth = 2
                 ctx.setLineDash([5, 5]);
                 ctx.beginPath();
                 ctx.arc(Math.floor(screen_pos[0]), Math.floor(screen_pos[1]), point_charge_size, 0, Math.PI*2)
@@ -137,6 +162,9 @@ function getPointChargeFieldLinePoint(charge, alpha)
 
 function getFieldLinePoints(charge)
 {
+    if (charge.q < 0)
+        return []
+
     let funct;
     switch (charge.type)
     {
@@ -178,9 +206,54 @@ function getField(x, y)
     return [fx, fy]
 }
 
-function getFieldLine(point)
+const point_charge_distance = point_charge_size/unitPerPixel
+console.log(point_charge_distance)
+function inNegative(x, y)
 {
+    let in_neg = false
+    neg_charges.map((charge) => {
+        if (Math.hypot(x-charge.x, y-charge.y) <= point_charge_distance)
+            in_neg = true
+    })
+    return in_neg
+}
 
+function getFieldLine([sx, sy])
+{
+    const new_line = [[sx, sy]]
+    let x = sx
+    let y = sy
+
+    for (let i = 0; i < record_steps; i++)
+    {
+        const past_steps = []
+        for (let j = 0; j < steps_per_record; j++)
+        {
+            const [fx, fy] = getField(x, y)
+            const angle = Math.atan2(fy, fx)
+            x += Math.cos(angle)*step_distance
+            y += Math.sin(angle)*step_distance
+
+            past_steps.push([x, y])
+        }
+
+        if (inNegative(x, y))
+        {
+            let lastStep = past_steps.length-1
+            
+            while (lastStep > 0 && inNegative(past_steps[lastStep][0], past_steps[lastStep][1]))
+            {
+                lastStep--;
+            }
+            x = past_steps[lastStep][0]
+            y = past_steps[lastStep][1]
+        }
+
+
+        new_line.push([x, y])
+    }
+
+    return new_line
 }
 
 function drawFieldLines() 
@@ -188,7 +261,28 @@ function drawFieldLines()
     Object.keys(charges).map((key) => {
         const charge = charges[key]
         const start_points = getFieldLinePoints(charge)
-        const lines = start_points.map(getFieldLine)
+        const space_lines = start_points.map(getFieldLine)
+
+        space_lines.map(line => {
+            const screen_line = line.map(getScreenPosA)    
+
+            ctx.strokeStyle = "white"
+            ctx.lineWidth = .5
+            ctx.beginPath()
+            ctx.moveTo(screen_line[0][0], screen_line[0][1])
+            for (let i = 1; i < screen_line.length; i++)
+            {
+                ctx.lineTo(screen_line[i][0], screen_line[i][1])
+            }
+            // ctx.closePath()
+            ctx.stroke()
+
+            const lastPoint = line[line.length-1]
+            const field = getField(lastPoint[0], lastPoint[1])
+
+            drawArrow(ctx, lastPoint[0], lastPoint[1], Math.atan2(field[1], field[0]), "white")
+        })
+        
     })
 }
 
@@ -199,6 +293,13 @@ function clearContext(context)
 
 function update()
 {
+    neg_charges = []
+    Object.keys(charges).map((key) => {
+        const charge = charges[key]
+        if (charge.q < 0)
+            neg_charges.push(charge)
+    })
+
     clearContext(ctx)
     drawFieldLines()
     drawCharges()
@@ -216,7 +317,6 @@ document.body.onmousemove = (e) => {
     const field = getField(space_pos[0], space_pos[1])
     const c = Math.hypot(field[0], field[1])
     const normal_field = [field[0]/c, field[1]/c]
-    console.log(field)
 
     clearContext(decor_ctx)
     decor_ctx.strokeStyle = "red"
