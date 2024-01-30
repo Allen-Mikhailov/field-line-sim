@@ -3,6 +3,11 @@ const topbar = document.getElementById("top-bar")
 const canvas = document.getElementById("line-canvas")
 const decor_canvas = document.getElementById("decor-canvas")
 
+import init, { greet } from "/pkg/field_line_sim.js";
+init().then(() => {
+    console.log(greet("WebAssembly"));
+});
+
 // Based on X
 let view_size = 50
 let view_radius = view_size/2
@@ -18,6 +23,8 @@ let record_steps = 60
 let steps_per_record = 200
 
 let neg_charges = []
+
+console.log("Updatinggggg")
 
 
 function update_screen_size()
