@@ -10,6 +10,14 @@ pub struct Vector2
 }
 
 #[wasm_bindgen]
+pub struct SimData
+{
+    record_frames: u32,
+    step_distance: f32,
+    steps_per_record: u32,
+}
+
+#[wasm_bindgen]
 impl Vector2 
 {
     pub fn new(x: f32, y: f32) -> Vector2 {
@@ -30,6 +38,7 @@ impl Vector2
 }
 
 #[wasm_bindgen]
+#[derive(Clone, Copy)]
 pub enum ChargeType
 {
     Point,
@@ -56,7 +65,17 @@ impl Charge
     pub fn set_pos(&mut self, pos: Vector2)
     { self.pos = pos; }
 
-    
+    pub fn get_q(&self) -> f32
+    { return self.q; }
+
+    pub fn set_q(&mut self, q: f32)
+    { self.q = q; } 
+
+    pub fn get_charge_type(&self) -> ChargeType
+    { return self.charge_type; }
+
+    pub fn set_charge_type(&mut self, charge_type: ChargeType)
+    { self.charge_type = charge_type }
 }
 
 #[wasm_bindgen]
