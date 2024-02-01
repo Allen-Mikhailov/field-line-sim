@@ -94,6 +94,19 @@ pub enum ChargeType
     Line
 }
 
+impl ChargeType
+{
+    pub fn from_raw(i: u32) -> ChargeType
+    {
+        match i {
+            0 => return ChargeType::Point,
+            1 => return ChargeType::Sphere,
+            2 => return ChargeType::Line,
+            _ => return ChargeType::Point
+        }
+    }
+}
+
 #[wasm_bindgen]
 // #[derive(Clone, Copy)]
 pub struct Charge
@@ -245,16 +258,25 @@ impl Simulation {
         }
     }
 
-    pub fn create_all_field_lines(arr: Array) //-> Vec<Vec<Vector2>>
+    pub fn create_all_field_lines(&self, arr: Array) //-> Vec<Vec<Vector2>>
     {
         let arr: js_sys::Array = arr.into();
         // Extracting charges from the array
         let mut charges: Vec<Charge> = Vec::with_capacity(arr.length() as usize);
         for i in 0..arr.length() {
             let js_object = arr.get(i).dyn_into::<js_sys::Object>().unwrap();
-            let q: f32 = Reflect::get(&js_object, &JsValue::from_str("id")).unwrap().as_f64().unwrap() as f32;
+            let q: f32 = Reflect::get(&js_object, &JsValue::from_str("q")).unwrap().as_f64().unwrap() as f32;
+            let x: f32 = Reflect::get(&js_object, &JsValue::from_str("x")).unwrap().as_f64().unwrap() as f32;
+            let y: f32 = Reflect::get(&js_object, &JsValue::from_str("y")).unwrap().as_f64().unwrap() as f32;
+            let raw_type: u32 = Reflect::get(&js_object, &JsValue::from_str("type")).unwrap().as_f64().unwrap() as u32;
 
-            console_log!("Charge {} with a value of {}", i, q);
+            charges.push(Charge {
+                pos: Vector2 {x, y}, 
+                q, 
+                charge_type: ChargeType::from_raw(raw_type)
+            });
+
+            console_log!("New Charge {} with a chare of {} a pos of {} {} and a type of {}", i, q, x, y, raw_type);
         }
         // let mut line_count: u32 = 0;
         // for charge in charges

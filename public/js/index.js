@@ -177,6 +177,14 @@ function update()
         point_charge_start, 
         1)
 
+    const charge_array = []
+    Object.keys(charges).map((key) => {
+        charge_array.push(charges[key])
+    })
+
+    console.log(charge_array)
+    simulation.create_all_field_lines(charge_array)
+
     neg_charges = []
     Object.keys(charges).map((key) => {
         const charge = charges[key]
