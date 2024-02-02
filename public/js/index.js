@@ -19,9 +19,18 @@ let step_distance = .005
 let record_points = 60
 let record_steps = 200
 
-let neg_charges = []
+const k = 1 //8.99 * Math.pow(10, 9)
+const nano = Math.pow(10, -9)
 
-console.log("Updatinggggg")
+const point_charge_size = 30
+let point_charge_start = point_charge_size/unitPerPixel
+const charge_density = 10
+const close_spawn_distance = .01
+
+const arrow_size = 10
+const arrow_angle = Math.PI/4
+
+let neg_charges = []
 
 
 function update_screen_size()
@@ -43,23 +52,14 @@ function update_screen_size()
     hHeight = height/2 
 
     unitPerPixel = (width/2)/view_size
+
+    point_charge_start = point_charge_size/unitPerPixel
 }
 
 update_screen_size()
 
 const ctx = canvas.getContext("2d")
 const decor_ctx = decor_canvas.getContext("2d")
-
-const k = 1 //8.99 * Math.pow(10, 9)
-const nano = Math.pow(10, -9)
-
-const point_charge_size = 30
-const point_charge_start = point_charge_size/unitPerPixel
-const charge_density = 10
-const close_spawn_distance = .01
-
-const arrow_size = 10
-const arrow_angle = Math.PI/4
 
 const charges = {
     "test-charge": {
@@ -70,7 +70,7 @@ const charges = {
     },
 }
 
-for (let i = 0; i < 3; i++)
+for (let i = 0; i < 1; i++)
 {
     const newCharge = {
         x: (Math.random()-.5)*2 * 35,
@@ -166,6 +166,8 @@ function clearContext(context)
     context.clearRect(0, 0, width, height);
 }
 
+let arrow_frequency = 20
+
 function update()
 {
     const simulation = new Simulation(
@@ -182,24 +184,77 @@ function update()
         charge_array.push(charges[key])
     })
 
-    console.log(charge_array)
-    simulation.create_all_field_lines(charge_array)
-
-    neg_charges = []
-    Object.keys(charges).map((key) => {
-        const charge = charges[key]
-        if (charge.q < 0)
-            neg_charges.push(charge)
-    })
+    simulation.create_all_field_lines(charge_array);
+    const float_array = simulation.get_recorded_points();
 
     clearContext(ctx)
     // drawFieldLines()
 
 
 
+
+    let i = 0;
+    const line_length = (record_points+1)*2
+
+    const line_color = "rgba(255, 255, 255, .5)"
+
+    ctx.strokeStyle = line_color
+    ctx.lineWidth = 1
+
+    while (i < float_array.length)
+    {
+        ctx.beginPath()
+        const start_point = getScreenPos(float_array[i], float_array[i+1])
+
+        let lastX = float_array[i]
+        let lastY = float_array[i+1]
+
+        let sLastX = float_array[i]
+        let sLastY = float_array[i+1]
+
+        ctx.moveTo(Math.round(start_point[0]), Math.round(start_point[1]))
+        for (let j = 1; j < record_points; j++)
+        {
+            const pIndex = i + j*2
+
+            // Hit charge edge and ended search
+            if (Math.abs(float_array[pIndex]-lastX) > 5000)
+            {   
+                ctx.stroke()
+                drawArrow(ctx, lastX, lastY, Math.atan2(
+                    lastY - sLastY, lastX - sLastX
+                    ), line_color)
+                break;
+            }
+
+            const point = getScreenPos(float_array[pIndex], float_array[pIndex+1])
+            ctx.lineTo(Math.round(point[0]), Math.round(point[1]))
+
+            sLastX = lastX
+            sLastY = lastY
+
+            lastX = float_array[pIndex]
+            lastY = float_array[pIndex+1]
+
+            // if (j%arrow_frequency == 0 || j == record_points-1)
+            //     drawArrow(ctx, lastX, lastY, Math.atan2(
+            //         lastY - sLastY, lastX - sLastX
+            //         ), line_color)
+        }
+        ctx.stroke()
+
+        drawArrow(ctx, lastX, lastY, Math.atan2(
+            lastY - sLastY, lastX - sLastX
+            ), line_color)
+
+        
+
+        i += line_length
+    }
+
     drawCharges()
 }
 
-init().then(() => {
+init().then(async () => {
     update()
 });
