@@ -3,11 +3,6 @@ const topbar = document.getElementById("top-bar")
 const canvas = document.getElementById("line-canvas")
 const decor_canvas = document.getElementById("decor-canvas")
 
-import init, { greet } from "/pkg/field_line_sim.js";
-init().then(() => {
-    console.log(greet("WebAssembly"));
-});
-
 // Based on X
 let view_size = 50
 let view_radius = view_size/2
@@ -18,9 +13,9 @@ let unitPerPixel
 let hWidth, hHeight
 let canvas_bounds
 
-let step_distance = .005
+let step_distance = .05
 let record_steps = 60
-let steps_per_record = 200
+let steps_per_record = 20
 
 let neg_charges = []
 
@@ -268,7 +263,10 @@ function drawFieldLines()
     Object.keys(charges).map((key) => {
         const charge = charges[key]
         const start_points = getFieldLinePoints(charge)
+
+        let start = Date.now()
         const space_lines = start_points.map(getFieldLine)
+        console.log("Calculation time: "+((Date.now()-start)/1000))
 
         space_lines.map(line => {
             const screen_line = line.map(getScreenPosA)    

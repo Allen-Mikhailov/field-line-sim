@@ -1,7 +1,7 @@
 // wasm-pack build --target web
 use std::vec;
 use std::f32::consts::PI;
-use js_sys::{Array, Object};
+use js_sys::{Array};
 use wasm_bindgen::JsValue;
 use wasm_bindgen::JsCast;
 use js_sys::Reflect;
@@ -304,7 +304,7 @@ impl Simulation {
                 charge_type: ChargeType::from_raw(raw_type)
             });
 
-            console_log!("New Charge {} with a chare of {} a pos of {} {} and a type of {}", i, q, x, y, raw_type);
+            // console_log!("New Charge {} with a chare of {} a pos of {} {} and a type of {}", i, q, x, y, raw_type);
         }
         let mut line_count: u32 = 0;
         for charge in &charges

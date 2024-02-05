@@ -1,5 +1,7 @@
 const topbar = document.getElementById("top-bar")
 
+const charge_div_container = document.getElementById("charge-container")
+
 const canvas = document.getElementById("line-canvas")
 const decor_canvas = document.getElementById("decor-canvas")
 
@@ -15,9 +17,9 @@ let unitPerPixel
 let hWidth, hHeight
 let canvas_bounds
 
-let step_distance = .005
+let step_distance = .05
 let record_points = 60
-let record_steps = 200
+let record_steps = 20
 
 const k = 1 //8.99 * Math.pow(10, 9)
 const nano = Math.pow(10, -9)
@@ -29,9 +31,6 @@ const close_spawn_distance = .01
 
 const arrow_size = 10
 const arrow_angle = Math.PI/4
-
-let neg_charges = []
-
 
 function update_screen_size()
 {
@@ -59,7 +58,7 @@ function update_screen_size()
 update_screen_size()
 
 const ctx = canvas.getContext("2d")
-const decor_ctx = decor_canvas.getContext("2d")
+const charge_divs = {}
 
 const charges = {
     "test-charge": {
@@ -70,7 +69,7 @@ const charges = {
     },
 }
 
-for (let i = 0; i < 1; i++)
+for (let i = 0; i < 3; i++)
 {
     const newCharge = {
         x: (Math.random()-.5)*2 * 35,
@@ -89,11 +88,6 @@ function getScreenPos(x, y)
         x*unitPerPixel+hWidth, 
         hHeight-y*unitPerPixel
     ]
-}
-
-function getScreenPosA([x, y])
-{
-    return getScreenPos(x, y)
 }
 
 function getSpacePos(x, y)
@@ -135,30 +129,41 @@ function drawCharges()
 {
     Object.keys(charges).map((key) => {
         const obj = charges[key]
+        let div = charge_divs[key]
+        if (!div)
+        {
+            div = document.createElement("div")
+            div.className = "charge"
 
+            charge_div_container.appendChild(div)
+        }
+
+        div.style.borderColor = obj.q > 0? "blue":"red"
+        div.style.width  = (point_charge_size*2)+"px"
+        div.style.height = (point_charge_size*2)+"px"
         const screen_pos = getScreenPos(obj.x, obj.y)
 
-        switch (obj.type)
-        {
-            // Point Charge
-            case 0:
-                ctx.strokeStyle = getChargeColor(obj.q)
-                ctx.lineWidth = 2
-                ctx.setLineDash([5, 5]);
-                ctx.beginPath();
-                ctx.arc(Math.floor(screen_pos[0]), Math.floor(screen_pos[1]), point_charge_size, 0, Math.PI*2)
-                ctx.closePath()
-                ctx.stroke();
-                // ctx.fill();
-                break
+        div.style.left = screen_pos[0]+"px"
+        div.style.top = screen_pos[1]+"px"
+
+
+        // switch (obj.type)
+        // {
+        //     // Point Charge
+        //     case 0:
+        //         ctx.strokeStyle = getChargeColor(obj.q)
+        //         ctx.lineWidth = 2
+        //         ctx.setLineDash([5, 5]);
+        //         ctx.beginPath();
+        //         ctx.arc(Math.floor(screen_pos[0]), Math.floor(screen_pos[1]), point_charge_size, 0, Math.PI*2)
+        //         ctx.closePath()
+        //         ctx.stroke();
+        //         // ctx.fill();
+        //         break
                 
-        }
+        // }
     })
 }
-
-
-const point_charge_distance = point_charge_size/unitPerPixel
-console.log(point_charge_distance)
 
 
 function clearContext(context)
@@ -166,17 +171,16 @@ function clearContext(context)
     context.clearRect(0, 0, width, height);
 }
 
-let arrow_frequency = 20
-
-function update()
+function update_field_lines()
 {
+    const point_charge_distance = point_charge_size/unitPerPixel
     const simulation = new Simulation(
         record_points, 
         step_distance, 
         record_steps, 
         charge_density, 
         close_spawn_distance, 
-        point_charge_start, 
+        point_charge_distance, 
         1)
 
     const charge_array = []
@@ -184,15 +188,11 @@ function update()
         charge_array.push(charges[key])
     })
 
+    let start = Date.now()
     simulation.create_all_field_lines(charge_array);
     const float_array = simulation.get_recorded_points();
-
-    clearContext(ctx)
-    // drawFieldLines()
-
-
-
-
+    console.log("Calculation time: "+((Date.now()-start)/1000))
+    
     let i = 0;
     const line_length = (record_points+1)*2
 
@@ -219,13 +219,7 @@ function update()
 
             // Hit charge edge and ended search
             if (Math.abs(float_array[pIndex]-lastX) > 5000)
-            {   
-                ctx.stroke()
-                drawArrow(ctx, lastX, lastY, Math.atan2(
-                    lastY - sLastY, lastX - sLastX
-                    ), line_color)
                 break;
-            }
 
             const point = getScreenPos(float_array[pIndex], float_array[pIndex+1])
             ctx.lineTo(Math.round(point[0]), Math.round(point[1]))
@@ -251,6 +245,14 @@ function update()
 
         i += line_length
     }
+}
+
+function update()
+{
+    
+
+    clearContext(ctx)
+    update_field_lines()
 
     drawCharges()
 }
