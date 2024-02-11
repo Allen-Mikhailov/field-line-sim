@@ -5,7 +5,7 @@ const charge_div_container = document.getElementById("charge-container")
 const canvas = document.getElementById("line-canvas")
 const decor_canvas = document.getElementById("decor-canvas")
 
-import init, { Simulation, ChargeType } from "/pkg/field_line_sim.js";
+import init, { Simulation, Vector2 } from "/pkg/field_line_sim.js";
 
 // Based on X
 let view_size = 50
@@ -25,37 +25,18 @@ const k = 1 //8.99 * Math.pow(10, 9)
 const nano = Math.pow(10, -9)
 
 const point_charge_size = 30
-let point_charge_start = point_charge_size/unitPerPixel
+let point_charge_start = .01//point_charge_size/unitPerPixel
 const charge_density = 10
-const close_spawn_distance = .01
+const close_spawn_distance = .055
 
+const arrow_frequency = 10
 const arrow_size = 10
 const arrow_angle = Math.PI/4
 
-function update_screen_size()
-{
-    width = canvas.offsetWidth
-    height = canvas.offsetHeight
+// If any float has this value the line has ended there
+let farValue
 
-    canvas_bounds = canvas.getBoundingClientRect()
-
-    console.log(width, height)
-
-    canvas.setAttribute("width", width)
-    canvas.setAttribute("height", height)
-
-    decor_canvas.setAttribute("width", width)
-    decor_canvas.setAttribute("height", height)
-
-    hWidth = width/2 
-    hHeight = height/2 
-
-    unitPerPixel = (width/2)/view_size
-
-    point_charge_start = point_charge_size/unitPerPixel
-}
-
-update_screen_size()
+let field_line_floats = []
 
 const ctx = canvas.getContext("2d")
 const charge_divs = {}
@@ -143,6 +124,8 @@ function drawCharges()
         div.style.height = (point_charge_size*2)+"px"
         const screen_pos = getScreenPos(obj.x, obj.y)
 
+        console.log(screen_pos)
+
         div.style.left = screen_pos[0]+"px"
         div.style.top = screen_pos[1]+"px"
 
@@ -173,7 +156,7 @@ function clearContext(context)
 
 function update_field_lines()
 {
-    const point_charge_distance = point_charge_size/unitPerPixel
+    const point_charge_distance = close_spawn_distance//point_charge_size/unitPerPixel
     const simulation = new Simulation(
         record_points, 
         step_distance, 
@@ -190,27 +173,45 @@ function update_field_lines()
 
     let start = Date.now()
     simulation.create_all_field_lines(charge_array);
-    const float_array = simulation.get_recorded_points();
+    field_line_floats = simulation.get_recorded_points();
     console.log("Calculation time: "+((Date.now()-start)/1000))
     
+}
+function render_field_lines()
+{
+    clearContext(ctx)
+
     let i = 0;
     const line_length = (record_points+1)*2
 
-    const line_color = "rgba(255, 255, 255, .5)"
+    const line_color = "rgb(150, 150, 150)"
 
     ctx.strokeStyle = line_color
     ctx.lineWidth = 1
 
-    while (i < float_array.length)
+    const arrows = []
+
+    while (i < field_line_floats.length)
     {
         ctx.beginPath()
-        const start_point = getScreenPos(float_array[i], float_array[i+1])
+        const start_point = getScreenPos(field_line_floats[i], field_line_floats[i+1])
 
-        let lastX = float_array[i]
-        let lastY = float_array[i+1]
+        let current_line_length = Math.min(field_line_floats.indexOf(farValue, i)-i, line_length)/2;
 
-        let sLastX = float_array[i]
-        let sLastY = float_array[i+1]
+        let lastX = field_line_floats[i]
+
+        let lastY = field_line_floats[i+1]
+
+        let sLastX = field_line_floats[i]
+        let sLastY = field_line_floats[i+1]
+
+        let arrow_start_offset = Math.floor(((current_line_length%arrow_frequency)+arrow_frequency)/2)
+
+        console.log(`I: ${i} 
+        next stop: ${field_line_floats.indexOf(farValue, i)-i} 
+        length: ${line_length} 
+        "current line length: ${current_line_length}
+        offset ${arrow_start_offset}`)
 
         ctx.moveTo(Math.round(start_point[0]), Math.round(start_point[1]))
         for (let j = 1; j < record_points; j++)
@@ -218,45 +219,75 @@ function update_field_lines()
             const pIndex = i + j*2
 
             // Hit charge edge and ended search
-            if (Math.abs(float_array[pIndex]-lastX) > 5000)
+            if (Math.abs(field_line_floats[pIndex]-lastX) > 100)
                 break;
 
-            const point = getScreenPos(float_array[pIndex], float_array[pIndex+1])
+            const point = getScreenPos(field_line_floats[pIndex], field_line_floats[pIndex+1])
             ctx.lineTo(Math.round(point[0]), Math.round(point[1]))
 
             sLastX = lastX
             sLastY = lastY
 
-            lastX = float_array[pIndex]
-            lastY = float_array[pIndex+1]
+            lastX = field_line_floats[pIndex]
+            lastY = field_line_floats[pIndex+1]
 
-            // if (j%arrow_frequency == 0 || j == record_points-1)
-            //     drawArrow(ctx, lastX, lastY, Math.atan2(
-            //         lastY - sLastY, lastX - sLastX
-            //         ), line_color)
+            if ((j+arrow_start_offset)%arrow_frequency == 0)
+                arrows.push([lastX, lastY, Math.atan2(
+                    lastY - sLastY, lastX - sLastX
+                    )])
         }
         ctx.stroke()
 
-        drawArrow(ctx, lastX, lastY, Math.atan2(
-            lastY - sLastY, lastX - sLastX
-            ), line_color)
+        // drawArrow(ctx, lastX, lastY, Math.atan2(
+        //     lastY - sLastY, lastX - sLastX
+        //     ), line_color)
 
+        arrows.map((arrow) => {
+            drawArrow(ctx, arrow[0], arrow[1], arrow[2], line_color)
+        })
         
 
         i += line_length
+
+        break;
     }
 }
 
-function update()
+function update_screen_size()
 {
-    
+    width = canvas.offsetWidth
+    height = canvas.offsetHeight
 
-    clearContext(ctx)
-    update_field_lines()
+    canvas_bounds = canvas.getBoundingClientRect()
 
+    console.log(width, height)
+
+    canvas.setAttribute("width", width)
+    canvas.setAttribute("height", height)
+
+    decor_canvas.setAttribute("width", width)
+    decor_canvas.setAttribute("height", height)
+
+    hWidth = width/2 
+    hHeight = height/2 
+
+    unitPerPixel = (width/2)/view_size
+
+    point_charge_start = point_charge_size/unitPerPixel
+}
+
+function render_update()
+{
+    update_screen_size()
+    render_field_lines()
     drawCharges()
 }
 
+window.addEventListener('resize', render_update);
+
 init().then(async () => {
-    update()
+    farValue = Vector2.neg1().get_x()
+
+    update_field_lines()
+    render_update()
 });

@@ -1,6 +1,7 @@
 // wasm-pack build --target web
 use std::vec;
 use std::f32::consts::PI;
+use js_sys::Object;
 use js_sys::{Array};
 use wasm_bindgen::JsValue;
 use wasm_bindgen::JsCast;
@@ -115,36 +116,30 @@ impl ChargeType
 
 #[wasm_bindgen]
 // #[derive(Clone, Copy)]
-pub struct Charge
+pub struct PointCharge
 {
     pos: Vector2,
     q: f32,
-    charge_type: ChargeType
 }
 
-#[wasm_bindgen]
-impl Charge
+pub struct SphereCharge 
 {
-    pub fn new(x: f32, y: f32, q: f32, charge_type: ChargeType) -> Charge 
-    { return Charge {pos: Vector2 {x, y}, q, charge_type} }
+    pos: Vector2,
+    q: f32,
+    r: f32
+}
 
-    pub fn get_pos(&mut self) -> Vector2
-    { return self.pos; }
+pub struct LineCharge 
+{
+    pos: Vector2,
+    q: f32,
+    a: f32
+}
 
-    pub fn set_pos(&mut self, pos: Vector2)
-    { self.pos = pos; }
-
-    pub fn get_q(&self) -> f32
-    { return self.q; }
-
-    pub fn set_q(&mut self, q: f32)
-    { self.q = q; } 
-
-    pub fn get_charge_type(&self) -> ChargeType
-    { return self.charge_type; }
-
-    pub fn set_charge_type(&mut self, charge_type: ChargeType)
-    { self.charge_type = charge_type }
+pub struct Charges {
+    point_charges: Vec<PointCharge>,
+    sphere_charges: Vec<SphereCharge>,
+    lines_charges: Vec<LineCharge>,
 }
 
 #[wasm_bindgen]
@@ -163,60 +158,85 @@ pub struct Simulation
 }
 
 impl Simulation {
-    pub fn get_field_line_count(&self, charge: &Charge) -> u32
+    pub fn get_field_line_count(&self, charge: f32) -> u32
     {
-        return if charge.q > 0f32 {(self.charge_density*charge.q).ceil() as u32} else {0};
+        return if charge > 0f32 {(self.charge_density*charge).ceil() as u32} else {0};
     }
 
-    pub fn get_field_start_points(&self, charge: &Charge) -> Vec<Vector2>
+    pub fn get_field_start_points(&self, charges: &Charges) -> Vec<Vector2>
     {
-        let point_count: f32 = self.get_field_line_count(charge) as f32;
-        let mut points: Vec<Vector2> = vec![Vector2::neg1(); point_count as usize];
+        let mut points: Vec<Vector2> = Vec::new();
 
-        for i in 0..(point_count as u32) 
+        for charge in charges.point_charges.iter()
         {
-            let a: f32 = 2f32 * PI * (i as f32) / point_count;
-            points[i as usize] = Vector2 {
-                x: charge.pos.x + a.cos() * self.close_spawn_distance,
-                y: charge.pos.y + a.sin() * self.close_spawn_distance,
+            let point_count = self.get_field_line_count(charge.q);
+            for i in 0..point_count
+            {
+                let a: f32 = 2f32 * PI * (i as f32) / point_count as f32;
+                points.push(Vector2 {
+                    x: charge.pos.x + a.cos() * self.close_spawn_distance,
+                    y: charge.pos.y + a.sin() * self.close_spawn_distance,
+                })
             }
+            
         }
 
         return points;
     }
 
-    pub fn get_field(&self, charges: &Vec<Charge>, pos: &Vector2) -> Vector2
+    pub fn get_field(&self, charges: &Charges, pos: &Vector2) -> Vector2
     {
         let mut field: Vector2 = Vector2 { x: 0f32, y: 0f32 };
-        for charge in charges.iter() {
-            match charge.charge_type {
-                ChargeType::Point=>{
-                    let a: f32   = f32::atan2(pos.y-charge.pos.y, pos.x-charge.pos.x);
-                    let mag: f32 = charge.q/f32::hypot(pos.y-charge.pos.y, pos.x-charge.pos.x);
-                    field.add_self_from_angle(a, mag);
-                }, 
-                ChargeType::Sphere=>{
-                    
-                }, 
-                ChargeType::Line=>{
-                    
-                }, 
-            }
+
+        // Point Charges
+        for charge in charges.point_charges.iter() {
+            let a: f32   = f32::atan2(pos.y-charge.pos.y, pos.x-charge.pos.x);
+            let mag: f32 = charge.q/f32::hypot(pos.y-charge.pos.y, pos.x-charge.pos.x);
+            field.add_self_from_angle(a, mag);
+        }
+
+        // Sphere Charges
+        for charge in charges.point_charges.iter() {
+            let a: f32   = f32::atan2(pos.y-charge.pos.y, pos.x-charge.pos.x);
+            let mag: f32 = charge.q/f32::hypot(pos.y-charge.pos.y, pos.x-charge.pos.x);
+            field.add_self_from_angle(a, mag);
+        }
+
+        // Sphere Charges
+        for charge in charges.lines_charges.iter() {
+            
         }
 
         return field.normalized().to_scale(self.k);
     }
 
-    pub fn in_negative_charge(&self, charges: &Vec<Charge>, pos: &Vector2) -> bool
+    pub fn in_negative_charge(&self, charges: &Charges, pos: &Vector2) -> bool
     {
-        for charge in charges {
+        // Point Charges
+        for charge in charges.point_charges.iter()
+        {
             if charge.q < 0f32 && Vector2::sub(&charge.pos, pos).mag() < self.point_distance
             { return true; }
         }
+
+        // Sphere Charges
+        for charge in charges.sphere_charges.iter()
+        {
+            if charge.q < 0f32 && Vector2::sub(&charge.pos, pos).mag() < charge.r
+            { return true; }
+        }
+
+        // Line Charges
+        for i in 0..charges.lines_charges.len()
+        {
+            let charge = &charges.lines_charges[i];
+            
+        }
+
         return false;
     }
 
-    pub fn generate_field_line(&self, charges: &Vec<Charge>, start_pos: &Vector2) -> Vec<Vector2>
+    pub fn generate_field_line(&self, charges: &Charges, start_pos: &Vector2) -> Vec<Vector2>
     {
         let mut points: Vec<Vector2> = vec![Vector2::neg1(); self.record_points as usize + 1];
         let mut recent_points: Vec<Vector2> = vec![Vector2::neg1(); self.record_steps as usize];
@@ -227,7 +247,7 @@ impl Simulation {
         for i in 0..self.record_points {
             for j in 0..self.record_steps {
                 recent_points[j as usize] = pos;
-                pos.add_self(&self.get_field(charges, &pos).to_scale(self.step_distance));
+                pos.add_self(&self.get_field(&charges, &pos).to_scale(self.step_distance));
             }
 
             let mut j: i32 = (self.record_steps - 1) as i32;
@@ -247,6 +267,47 @@ impl Simulation {
         }
 
         return points;
+    }
+}
+
+pub fn get_js_f32(js_object: &Object, name: &str) -> f32
+{
+    return Reflect::get(&js_object, &JsValue::from_str(name)).unwrap().as_f64().unwrap() as f32;
+}
+
+pub fn get_js_vector2(js_object: &Object) -> Vector2
+{
+    return Vector2 { 
+        x: get_js_f32(&js_object, "x"), 
+        y: get_js_f32(&js_object, "y") 
+    };
+}
+
+pub fn add_charge_to_charges(charges: &mut Charges, js_object: &Object)
+{
+    let raw_type: u32 = Reflect::get(&js_object, &JsValue::from_str("type")).unwrap().as_f64().unwrap() as u32;
+    let charge_type: ChargeType = ChargeType::from_raw(raw_type);
+    match charge_type {
+        ChargeType::Point=>{
+            charges.point_charges.push(PointCharge {
+                pos: get_js_vector2(js_object),
+                q: get_js_f32(&js_object, "q")
+            });
+        }, 
+        ChargeType::Sphere=>{
+            charges.sphere_charges.push(SphereCharge {
+                pos: get_js_vector2(js_object),
+                q: get_js_f32(&js_object, "q"),
+                r: get_js_f32(&js_object, "r"),
+            });
+        }, 
+        ChargeType::Line=>{
+            charges.lines_charges.push(LineCharge {
+                pos: get_js_vector2(js_object),
+                q: get_js_f32(&js_object, "q"),
+                a: get_js_f32(&js_object, "a"),
+            });
+        }, 
     }
 }
 
@@ -290,46 +351,39 @@ impl Simulation {
     {
         let arr: js_sys::Array = arr.into();
         // Extracting charges from the array
-        let mut charges: Vec<Charge> = Vec::with_capacity(arr.length() as usize);
+        let mut charges: Charges = Charges {
+            point_charges: Vec::new(),
+            lines_charges: Vec::new(),
+            sphere_charges: Vec::new(),
+        };
+
         for i in 0..arr.length() {
             let js_object = arr.get(i).dyn_into::<js_sys::Object>().unwrap();
-            let q: f32 = Reflect::get(&js_object, &JsValue::from_str("q")).unwrap().as_f64().unwrap() as f32;
-            let x: f32 = Reflect::get(&js_object, &JsValue::from_str("x")).unwrap().as_f64().unwrap() as f32;
-            let y: f32 = Reflect::get(&js_object, &JsValue::from_str("y")).unwrap().as_f64().unwrap() as f32;
-            let raw_type: u32 = Reflect::get(&js_object, &JsValue::from_str("type")).unwrap().as_f64().unwrap() as u32;
-
-            charges.push(Charge {
-                pos: Vector2 {x, y}, 
-                q, 
-                charge_type: ChargeType::from_raw(raw_type)
-            });
+            add_charge_to_charges(&mut charges, &js_object);
 
             // console_log!("New Charge {} with a chare of {} a pos of {} {} and a type of {}", i, q, x, y, raw_type);
         }
-        let mut line_count: u32 = 0;
-        for charge in &charges
+
+        let start_points: Vec<Vector2>;
         {
-            line_count += self.get_field_line_count(&charge);
+            start_points = self.get_field_start_points(&charges);
         }
 
-        let float_count: u32 = line_count * (self.record_points + 1) * 2;
+        let float_count: u32 = start_points.len() as u32 * (self.record_points + 1) * 2;
         self.recorded_points.resize(float_count as usize, 0.0f32);
 
         let mut i: u32 = 0;
-        for charge in &charges
+        for point in start_points
         {
-            let start_points: Vec<Vector2> = self.get_field_start_points(&charge);
-            for point in start_points
+            let line: Vec<Vector2> = self.generate_field_line(&charges, &point);
+            for p in line
             {
-                let line: Vec<Vector2> = self.generate_field_line(&charges, &point);
-                for p in line
-                {
-                    self.recorded_points[i as usize] = p.x;
-                    self.recorded_points[(i+1) as usize] = p.y;
-                    i += 2;
-                    // console_log!("I is {}", i);
-                }
+                self.recorded_points[i as usize] = p.x;
+                self.recorded_points[(i+1) as usize] = p.y;
+                i += 2;
+                // console_log!("I is {}", i);
             }
         }
+        
     }
 }
