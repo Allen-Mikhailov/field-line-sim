@@ -124,27 +124,10 @@ function drawCharges()
         div.style.height = (point_charge_size*2)+"px"
         const screen_pos = getScreenPos(obj.x, obj.y)
 
-        console.log(screen_pos)
+        // console.log(screen_pos)
 
         div.style.left = screen_pos[0]+"px"
         div.style.top = screen_pos[1]+"px"
-
-
-        // switch (obj.type)
-        // {
-        //     // Point Charge
-        //     case 0:
-        //         ctx.strokeStyle = getChargeColor(obj.q)
-        //         ctx.lineWidth = 2
-        //         ctx.setLineDash([5, 5]);
-        //         ctx.beginPath();
-        //         ctx.arc(Math.floor(screen_pos[0]), Math.floor(screen_pos[1]), point_charge_size, 0, Math.PI*2)
-        //         ctx.closePath()
-        //         ctx.stroke();
-        //         // ctx.fill();
-        //         break
-                
-        // }
     })
 }
 
@@ -177,6 +160,9 @@ function update_field_lines()
     console.log("Calculation time: "+((Date.now()-start)/1000))
     
 }
+
+
+
 function render_field_lines()
 {
     clearContext(ctx)
@@ -197,6 +183,8 @@ function render_field_lines()
         const start_point = getScreenPos(field_line_floats[i], field_line_floats[i+1])
 
         let current_line_length = Math.min(field_line_floats.indexOf(farValue, i)-i, line_length)/2;
+        if (current_line_length < 0)
+            current_line_length = record_points+1
 
         let lastX = field_line_floats[i]
 
@@ -205,16 +193,8 @@ function render_field_lines()
         let sLastX = field_line_floats[i]
         let sLastY = field_line_floats[i+1]
 
-        let arrow_start_offset = Math.floor(((current_line_length%arrow_frequency)+arrow_frequency)/2)
-
-        console.log(`I: ${i} 
-        next stop: ${field_line_floats.indexOf(farValue, i)-i} 
-        length: ${line_length} 
-        "current line length: ${current_line_length}
-        offset ${arrow_start_offset}`)
-
         ctx.moveTo(Math.round(start_point[0]), Math.round(start_point[1]))
-        for (let j = 1; j < record_points; j++)
+        for (let j = 1; j < record_points+1; j++)
         {
             const pIndex = i + j*2
 
@@ -225,22 +205,26 @@ function render_field_lines()
             const point = getScreenPos(field_line_floats[pIndex], field_line_floats[pIndex+1])
             ctx.lineTo(Math.round(point[0]), Math.round(point[1]))
 
+            // ctx.fillStyle = "red"
+            // ctx.fillArc(Math.round(point[0]), Math.round(point[1]), 5, 0, Math.PI*2)
+
             sLastX = lastX
             sLastY = lastY
 
             lastX = field_line_floats[pIndex]
             lastY = field_line_floats[pIndex+1]
 
-            if ((j+arrow_start_offset)%arrow_frequency == 0)
+            // console.log(j)
+
+            let spawn_arrow = ((j%arrow_frequency == 0 && j+5 < current_line_length) 
+                || (current_line_length < arrow_frequency*2 && Math.floor(current_line_length/2) == j));
+
+            if (spawn_arrow)
                 arrows.push([lastX, lastY, Math.atan2(
                     lastY - sLastY, lastX - sLastX
                     )])
         }
         ctx.stroke()
-
-        // drawArrow(ctx, lastX, lastY, Math.atan2(
-        //     lastY - sLastY, lastX - sLastX
-        //     ), line_color)
 
         arrows.map((arrow) => {
             drawArrow(ctx, arrow[0], arrow[1], arrow[2], line_color)
@@ -248,8 +232,6 @@ function render_field_lines()
         
 
         i += line_length
-
-        break;
     }
 }
 
