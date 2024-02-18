@@ -116,6 +116,7 @@ function drawCharges()
             div = document.createElement("div")
             div.className = "charge"
 
+            charge_divs[key] = div
             charge_div_container.appendChild(div)
         }
 
