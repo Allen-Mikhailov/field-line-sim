@@ -217,8 +217,9 @@ function render_field_lines()
 
             // console.log(j)
 
-            let spawn_arrow = ((j%arrow_frequency == 0 && j+5 < current_line_length) 
-                || (current_line_length < arrow_frequency*2 && Math.floor(current_line_length/2) == j));
+            let spawn_arrow = (current_line_length < arrow_frequency*2)? 
+                (Math.floor(current_line_length/2) == j):(j%arrow_frequency == 0 && j+5 < current_line_length) 
+                ;
 
             if (spawn_arrow)
                 arrows.push([lastX, lastY, Math.atan2(

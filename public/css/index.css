@@ -1,9 +1,15 @@
 :root {
-    --top-bar-space: 7.5%;
-    --background-color: #1c252c;
+    --tab-bar-space: 5vh;
+    --tool-bar-space: 5vh;
+    --side-bar-space: 15vw;
+
+    --border-width: 2px;
+
+    --background-color: rgb(37, 50, 59);
     --top-bar-color: #192229;
-    --border-color: #0e1316;
-    --code-color: rgb(37, 50, 59);
+    --side-bar-color: #1c252c;
+
+    --border-color: #31444f; 
     --line-color: rgb(86, 116, 138);
 
     font-size: 125%;
@@ -21,18 +27,56 @@ body {
     overflow: hidden;
 }
 
-#tool-bar {
+#tab-bar {
     background-color: var(--top-bar-color);
-    height: var(--top-bar-space);
-    width: 100vw;
-}
-
-.canvas {
-    height: calc(100vh - var(--top-bar-space));
+    height: var(--tab-bar-space);
     width: 100vw;
 
     position: absolute;
-    top: var(--top-bar-space);
+    left: 0%;
+    top: 0%;
+    /* border-spacing: ; */
+}
+
+#tool-bar {
+    position: absolute;
+    left: var(--side-bar-space);
+    top: var(--tab-bar-space);
+
+    background-color: var(--top-bar-color);
+    height: var(--tool-bar-space);
+    width: 100vw;
+}
+
+#side-bar {
+    position: absolute;
+    left: 0%;
+    top: var(--tab-bar-space);
+
+    width: var(--side-bar-space);
+    height: calc(100vh - var(--tab-bar-space));
+
+    background-color: var(--side-bar-color);
+}
+
+#side-bar-title {
+    width: 100%;
+    height: var(--tool-bar-space);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.canvas {
+    height: calc(100vh - var(--tab-bar-space) - var(--tool-bar-space));
+    width: calc(100vw - var(--side-bar-space));
+
+    position: absolute;
+    top: calc(var(--tab-bar-space) + var(--tool-bar-space));
+    left: var(--side-bar-space);
+
+    overflow: hidden;
 }
 
 .charge {
