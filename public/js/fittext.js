@@ -1,14 +1,6 @@
-/*!	
-* FitText.js 1.0 jQuery free version
-*
-* Copyright 2011, Dave Rupert http://daverupert.com 
-* Released under the WTFPL license 
-* http://sam.zoy.org/wtfpl/
-* Modified by Slawomir Kolodziej http://slawekk.info
-*
-* Date: Tue Aug 09 2011 10:45:54 GMT+0200 (CEST)
-*/
 (function(){
+    const canvas = document.createElement("canvas"); 
+    const context = canvas.getContext("2d"); 
 
     var addEvent = function (el, type, fn) {
       if (el.addEventListener)
@@ -28,22 +20,30 @@
   
       var settings = extend({
         'minFontSize' : -1/0,
-        'maxFontSize' : 1/0
+        'maxFontSize' : 1/0,
+        'font' : "monospace"
       },options);
   
       var fit = function (el) {
         var compressor = kompressor || 1;
   
         var resizer = function () {
-          el.style.fontSize = Math.max(Math.min(el.clientWidth / (compressor*10), parseFloat(settings.maxFontSize)), parseFloat(settings.minFontSize)) + 'px';
+          const bounds = el.getBoundingClientRect()
+          const width = bounds.width * compressor
+          const height = bounds.height * compressor
+
+          if (bounds.width == 0)
+            return setTimeout(resizer, 100)
+
+          context.font = `${height}px ${settings.font}`
+          const base_size = context.measureText(el.innerHTML).width
+          el.style.fontSize = (height * Math.min(width/base_size))+"px"
+
         };
   
         // Call once to set.
         resizer();
-  
-        // Bind events
-        // If you have any js library which support Events, replace this part
-        // and remove addEvent function (or use original jQuery version)
+
         addEvent(window, 'resize', resizer);
         addEvent(window, 'orientationchange', resizer);
       };

@@ -3,13 +3,13 @@
     --tool-bar-space: 5vh;
     --side-bar-space: 15vw;
 
-    --border-width: 2px;
+    --border-width: 1.5px;
 
     --background-color: rgb(37, 50, 59);
     --top-bar-color: #192229;
-    --side-bar-color: #1c252c;
+    --side-bar-color: #192229;
 
-    --border-color: #31444f; 
+    --border-color: #4e4f4f; 
     --line-color: rgb(86, 116, 138);
 
     font-size: 125%;
@@ -29,13 +29,15 @@ body {
 
 #tab-bar {
     background-color: var(--top-bar-color);
-    height: var(--tab-bar-space);
+    height: calc(var(--tab-bar-space) - var(--border-width));
     width: 100vw;
 
     position: absolute;
     left: 0%;
     top: 0%;
     /* border-spacing: ; */
+
+    border-bottom: var(--border-color) var(--border-width) solid;
 }
 
 #tool-bar {
@@ -53,19 +55,67 @@ body {
     left: 0%;
     top: var(--tab-bar-space);
 
-    width: var(--side-bar-space);
+    width: calc(var(--side-bar-space));
     height: calc(100vh - var(--tab-bar-space));
 
     background-color: var(--side-bar-color);
 }
 
 #side-bar-title {
+    width: 80%;
+    left: 5%;
+    height: 100%;
+
+    display: flex;
+    justify-content: left;
+    align-items: center;
+
+    white-space: nowrap;
+
+    position: absolute;
+}
+
+#side-bar-title-container {
+    width: calc(100% - var(--border-width));
+    height: var(--tool-bar-space);
+
+    position: relative;
+
+    border-right: var(--border-color) var(--border-width) solid;
+}
+
+#side-bar-select {
     width: 100%;
     height: var(--tool-bar-space);
 
-    display: flex;
+    background-color: var(--background-color);
+
+    /* /* display: flex; */
+    /* align-items: center;
     justify-content: center;
+    flex-direction: row;  */
+
+    /* display: inline-block; */
+}
+
+.side-bar-select-button {
+    display: inline-flex;
     align-items: center;
+    justify-content: center;
+    flex-direction: row;
+    height: var(--tool-bar-space);
+
+}
+
+#side-bar-select-button .selected {
+    
+    
+}
+
+#side-bar-page-container {
+    width: 100%;
+    height: calc(100% - var(--tool-bar-space) * 2);
+    /* background-color: red; */
 }
 
 .canvas {
