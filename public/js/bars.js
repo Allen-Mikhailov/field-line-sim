@@ -7,16 +7,20 @@ const sideBarPageContainer = document.getElementById("side-bar-page-container")
 
 fitText(document.getElementById("side-bar-title"), 1)
 
-class SideBarSubPage
+class SideBarPageActionBar
 {
-    constructor(name, displayName)
+    constructor(actions)
     {
-        this.name = name
+        // Dictionary
+        this.actions = actions
     }
 
     render(parent)
     {
+        const container = document.createElement("div")
+        container.classList.add("side-bar-page-action-bar")
 
+        parent.pageElement.appendChild(container)
     }
 }
 
@@ -26,17 +30,16 @@ class SideBarPage
     {
         this.name = name;
         this.displayName = displayName;
-        this.subpages = {}
+        this.items = []
     }
 
-    addSubPage(page)
+    addItem(item)
     {
-        this.subpages[page.name] = page
+        this.items.push(item)
     }
 
     render(parent)
     {
-        console.log("render2")
         const pageElement = document.createElement("div")
         pageElement.classList.add("side-bar-page")
         pageElement.style.visibility = "hidden"
@@ -50,7 +53,7 @@ class SideBarPage
         pageSelect.classList.add("side-bar-select-button")
         pageSelect.style.width = `calc(var(--side-bar-space) / ${buttons})`
         pageSelect.innerHTML = this.displayName
-        fitText(pageSelect, .8)
+        fitText(pageSelect, .7)
 
         pageSelect.onclick = () => {
             parent.setActivePage(this.name)
@@ -59,6 +62,10 @@ class SideBarPage
         sideBarSelect.appendChild(pageSelect)
 
         this.pageSelect = pageSelect
+
+        this.items.map((item) => {
+            item.render(this)
+        })
     }
 }
 
@@ -100,4 +107,4 @@ class SideBar
     }
 }
 
-export {SideBar, SideBarPage, SideBarSubPage}
+export {SideBar, SideBarPage, SideBarPageActionBar}

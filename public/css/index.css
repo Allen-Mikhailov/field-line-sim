@@ -31,7 +31,7 @@ body {
 
 #tab-bar {
     background-color: var(--top-bar-color);
-    height: calc(var(--tab-bar-space) - var(--border-width));
+    height: calc(var(--tab-bar-space));
     width: 100vw;
 
     position: absolute;
@@ -39,7 +39,7 @@ body {
     top: 0%;
     /* border-spacing: ; */
 
-    border-bottom: var(--border-color) var(--border-width) solid;
+    /* border-bottom: var(--border-color) var(--border-width) solid; */
 }
 
 #tool-bar {
@@ -61,6 +61,9 @@ body {
     height: calc(100vh - var(--tab-bar-space));
 
     background-color: var(--side-bar-color);
+    
+    display: flex;
+    flex-direction: column;
 }
 
 #side-bar-title {
@@ -78,17 +81,19 @@ body {
 }
 
 #side-bar-title-container {
-    width: calc(100% - var(--border-width));
+    width: calc(100%);
     height: var(--tool-bar-space);
 
     position: relative;
 
-    border-right: var(--border-color) var(--border-width) solid;
+    /* border-right: var(--border-color) var(--border-width) solid; */
 }
 
 #side-bar-select {
     width: 100%;
     height: var(--tool-bar-space);
+
+    /* display:inline-block */
 
     /* /* display: flex; */
     /* align-items: center;
@@ -109,9 +114,10 @@ body {
 }
 
 .side-bar-select-button.selected {
-    /* background-color: red; */
-    height: calc(var(--tool-bar-space) - var(--border-width));
+    box-sizing: border-box;
     border-top: var(--select-border-color) var(--border-width) solid;
+
+    height: calc(var(--tool-bar-space) - var(--border-width)*0);
 
     background-color: var(--background-color);
     
@@ -120,7 +126,11 @@ body {
 #side-bar-page-container {
     width: 100%;
     height: calc(100% - var(--tool-bar-space) * 2);
-    /* background-color: red; */
+}
+
+.side-bar-page-action-bar {
+    background-color: var(--background-color);
+    height: var(--tool-bar-space);
 }
 
 .canvas {
