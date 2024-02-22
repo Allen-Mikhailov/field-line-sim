@@ -5,7 +5,7 @@ const sideBar = document.getElementById("side-bar")
 const sideBarSelect = document.getElementById("side-bar-select")
 const sideBarPageContainer = document.getElementById("side-bar-page-container")
 
-fitText(document.getElementById("side-bar-title"), .8)
+fitText(document.getElementById("side-bar-title"), 1)
 
 class SideBarSubPage
 {

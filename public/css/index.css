@@ -12,6 +12,8 @@
     --border-color: #4e4f4f; 
     --line-color: rgb(86, 116, 138);
 
+    --select-border-color: #dd8a2b;
+
     font-size: 125%;
 }
 
@@ -88,8 +90,6 @@ body {
     width: 100%;
     height: var(--tool-bar-space);
 
-    background-color: var(--background-color);
-
     /* /* display: flex; */
     /* align-items: center;
     justify-content: center;
@@ -105,10 +105,15 @@ body {
     flex-direction: row;
     height: var(--tool-bar-space);
 
+    cursor: pointer;
 }
 
-#side-bar-select-button .selected {
-    
+.side-bar-select-button.selected {
+    /* background-color: red; */
+    height: calc(var(--tool-bar-space) - var(--border-width));
+    border-top: var(--select-border-color) var(--border-width) solid;
+
+    background-color: var(--background-color);
     
 }
 
