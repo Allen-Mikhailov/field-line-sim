@@ -272,7 +272,9 @@ impl Simulation {
 
 pub fn get_js_f32(js_object: &Object, name: &str) -> f32
 {
-    return Reflect::get(&js_object, &JsValue::from_str(name)).unwrap().as_f64().unwrap() as f32;
+    unsafe {
+        return Reflect::get(&js_object, &JsValue::from_str(name)).unwrap().as_f64().unwrap() as f32;
+    }
 }
 
 pub fn get_js_vector2(js_object: &Object) -> Vector2
@@ -285,7 +287,7 @@ pub fn get_js_vector2(js_object: &Object) -> Vector2
 
 pub fn add_charge_to_charges(charges: &mut Charges, js_object: &Object)
 {
-    let raw_type: u32 = Reflect::get(&js_object, &JsValue::from_str("type")).unwrap().as_f64().unwrap() as u32;
+    let raw_type: u32 = unsafe {Reflect::get(&js_object, &JsValue::from_str("type")).unwrap().as_f64().unwrap() as u32};
     let charge_type: ChargeType = ChargeType::from_raw(raw_type);
     match charge_type {
         ChargeType::Point=>{

@@ -1,6 +1,7 @@
 :root {
     --tab-bar-space: 5vh;
     --tool-bar-space: 5vh;
+    --item-space: 5vh;
     --side-bar-space: 15vw;
 
     --border-width: 1.5px;
@@ -40,6 +41,20 @@ body {
     /* border-spacing: ; */
 
     /* border-bottom: var(--border-color) var(--border-width) solid; */
+}
+
+#tab-bar-title {
+    height: 100%;
+    width: 30%;
+    position: absolute;
+    /* text-align: center; */
+
+    left: 50%;
+    translate: -50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 #tool-bar {
@@ -91,16 +106,7 @@ body {
 
 #side-bar-select {
     width: 100%;
-    height: var(--tool-bar-space);
-
-    /* display:inline-block */
-
-    /* /* display: flex; */
-    /* align-items: center;
-    justify-content: center;
-    flex-direction: row;  */
-
-    /* display: inline-block; */
+    height: var(--item-space);
 }
 
 .side-bar-select-button {
@@ -108,7 +114,7 @@ body {
     align-items: center;
     justify-content: center;
     flex-direction: row;
-    height: var(--tool-bar-space);
+    height: var(--item-space);
 
     cursor: pointer;
 }
@@ -117,7 +123,7 @@ body {
     box-sizing: border-box;
     border-top: var(--select-border-color) var(--border-width) solid;
 
-    height: calc(var(--tool-bar-space) - var(--border-width)*0);
+    height: calc(var(--item-space));
 
     background-color: var(--background-color);
     
@@ -130,7 +136,70 @@ body {
 
 .side-bar-page-action-bar {
     background-color: var(--background-color);
-    height: var(--tool-bar-space);
+    height: var(--item-space);
+
+    align-items: center;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    /* display: grid; */
+}
+
+.side-bar-page-action-bar-title {
+    height: 100%;
+    width: calc(var(--side-bar-space) * .5);
+
+    justify-self: left;
+
+    /* margin-left: 10%; */
+
+    grid-row: 1;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.side-bar-page-action-bar > .container {
+    /* width: calc(var(--side-bar-space) * .5); */
+
+    display: flex;
+    align-items: center;
+    justify-content: right;
+}
+
+.small-button {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+
+    justify-self: right;
+    
+
+    width: calc(var(--item-space) *.7);
+    aspect-ratio: 1;
+
+    grid-row: 1;
+    display: flex;
+
+    filter: opacity(25%);
+
+    cursor: pointer;
+}
+
+.side-bar-page-list {
+    width: 100%;
+}
+
+.side-bar-page-list-item {
+    width: 100%;
+}
+
+.small-button:hover {
+    filter: opacity(50%);
+    border-radius: 20%;
+    background-color: rgba(255, 255, 255, 0.288);
 }
 
 .canvas {
