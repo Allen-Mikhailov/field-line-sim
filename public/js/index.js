@@ -244,7 +244,7 @@ function update_screen_size()
 
     canvas_bounds = canvas.getBoundingClientRect()
 
-    console.log(width, height)
+    // console.log(width, height)
 
     canvas.setAttribute("width", width)
     canvas.setAttribute("height", height)

@@ -1,11 +1,15 @@
 const tabBar = document.getElementById("tab-bar")
 const toolBar = document.getElementById("tool-bar")
 const sideBar = document.getElementById("side-bar")
+const miniSideBar = document.getElementById("mini-side-bar")
+const miniSideBarTop = miniSideBar.children[0]
+const miniSideBarBot = miniSideBar.children[1]
 
 const sideBarSelect = document.getElementById("side-bar-select")
 const sideBarPageContainer = document.getElementById("side-bar-page-container")
 
-fitText(document.getElementById("tab-bar-title"), .8)
+fitText(document.getElementById("tab-bar-title"), .5)
+fitText(document.getElementById("side-bar-title"), .8)
 
 class SideBarPageActionBar
 {
@@ -128,7 +132,7 @@ class SideBarPage
 
         const pageSelect = document.createElement("div")
         pageSelect.classList.add("side-bar-select-button")
-        pageSelect.style.width = `calc(var(--side-bar-space) / ${buttons})`
+        pageSelect.style.width = `calc(var(--main-side-bar-space) / ${buttons})`
         pageSelect.innerHTML = this.displayName
         fitText(pageSelect, .7)
 
@@ -183,4 +187,57 @@ class SideBar
     }
 }
 
-export {SideBar, SideBarPage, SideBarPageActionBar}
+class MiniSideBar
+{
+    constructor()
+    {
+        this.selected = ""
+        this.buttons = {}
+    }
+    
+    addButton(button)
+    {
+        this.buttons[button.name] = button
+    }
+
+    render()
+    {
+        Object.keys(this.buttons).map((key) => {
+            this.buttons[key].render(this)
+        })
+    }
+}
+
+class MiniSideBarButton
+{
+    constructor(name, icon, action, location)
+    {
+        this.name = name;
+        this.icon = icon;
+        this.action = action;
+        this.location = location;
+
+        this.el = undefined;
+    }
+
+    render(miniSideBar)
+    {
+        const el = document.createElement("div")
+        el.classList.add("mini-bar-side-button")
+
+        el.onclick = () => {action(parent)}
+        el.style.backgroundImage = `url(${this.icon})`
+
+        const parent = this.location=="top"?miniSideBarTop:miniSideBarBot
+        parent.appendChild(el)
+
+        this.el = el;
+    }
+
+    toggleSelected(value)
+    {
+        this.el.className = `mini-bar-side-button ${value?"selected":""}`
+    }
+}
+
+export {SideBar, SideBarPage, SideBarPageActionBar, SideBarList, MiniSideBar, MiniSideBarButton}

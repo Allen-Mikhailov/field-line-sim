@@ -1,4 +1,4 @@
-import { SideBar, SideBarPage, SideBarPageActionBar } from "./bars.js"
+import { SideBar, SideBarPage, SideBarPageActionBar, MiniSideBarButton, MiniSideBar } from "./bars.js"
 
 const sideBar = new SideBar()
 
@@ -17,3 +17,13 @@ const objectsPage = new SideBarPage("objects", "Objects")
 sideBar.addPage(objectsPage)
 
 sideBar.render()
+
+const miniSideBar = new MiniSideBar();
+
+const WorldsButton = new MiniSideBarButton("worlds", "/imgs/plus.png", ()=>{console.log("tests")}, "top")
+miniSideBar.addButton(WorldsButton)
+
+const SettingsButton = new MiniSideBarButton("settings", "/imgs/plus.png", ()=>{console.log("tests")}, "bot")
+miniSideBar.addButton(SettingsButton)
+
+miniSideBar.render()

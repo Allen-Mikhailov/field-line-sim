@@ -32,15 +32,20 @@
           const width = bounds.width * compressor
           const height = bounds.height * compressor
 
-          if (bounds.width == 0)
+          if (bounds.width == 0 || bounds.height == 0)
             return setTimeout(resizer, 100)
 
           // 16px is the test value because it scales linearly
           const test_val = 16
           context.font = `${test_val}px ${settings.font}`
           const measure = context.measureText(el.innerHTML)
-          const font_size = test_val*Math.min(width/measure.width, height/measure.height)
+          const measureH = measure.actualBoundingBoxAscent + measure.actualBoundingBoxDescent
+          const font_size = test_val*Math.min(width/measure.width, height/(18.4))
+          // const font_size = test_val*height/measureH
           el.style.fontSize = font_size+"px"
+
+          if (el.innerHTML == "FIELD LINE SIMULATOR")
+            console.log("updates", width, height, measure.width, measureH, font_size)
         };
   
         // Call once to set.
