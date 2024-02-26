@@ -13,13 +13,18 @@ fitText(document.getElementById("side-bar-title"), .8)
 
 class SideBarPageActionBar
 {
-    constructor(actions, title)
+    constructor(title, actions)
     {
         // Dictionary
-        this.actions = actions
+        this.actions = actions || []
 
         if (title)
             this.title = title
+    }
+
+    addAction(action)
+    {
+        this.actions.push(action)
     }
 
     render(parent)
@@ -63,7 +68,9 @@ class SideBarList
         this.items = {}
         this.item_divs = {}
         this.item_actions = item_actions
-        this.selected = null
+        this.selected = ""
+
+        this.temp_item = null
 
         if (height)
             this.height = height
@@ -72,6 +79,7 @@ class SideBarList
     updateItems(new_items)
     {
         this.items = new_items
+        console.log("new Items", new_items)
 
         // Removing Old Items
         Object.keys(this.item_divs).map((key) => {
@@ -88,9 +96,88 @@ class SideBarList
             if (!el)
             {
                 el = document.createElement("div")
-                el.classList.add("")
+                el.classList.add("side-bar-page-list-item")
+
+                const titleEl = document.createElement("div")
+                titleEl.classList.add("title")
+                titleEl.innerHTML = this.items[key].displayName
+                el.appendChild(titleEl)
+
+                fitText(titleEl, .5)
+
+                const buttonContainer = document.createElement("div")
+                buttonContainer.classList.add("container")
+
+                this.item_actions.map(({img, fun}) => {
+                    const actionEl = document.createElement("div")
+                    actionEl.classList.add("small-button")
+                    actionEl.onclick = () => fun(key)
+                    actionEl.style.backgroundImage = `url(${img})`
+
+                    buttonContainer.appendChild(actionEl)
+                })
+
+                el.appendChild(buttonContainer)
+
+                this.el.appendChild(el)
+
+                this.item_divs[key] = el
             }
         })
+    }
+
+    updateSelected()
+    {
+        Object.keys(this.items).map((key) => {
+            let el = this.item_divs[key]
+            el.className = `side-bar-page-list-item ${this.selected==key?"selected":""}`
+        })
+    }
+
+    createTempItem(onFinalize)
+    {
+        if (this.temp_item)
+        {
+            this.temp_item.remove()
+        }
+    
+        const tempElement = document.createElement("div")
+        tempElement.classList.add("side-bar-page-list-new")
+
+        const inputElement = document.createElement("input")
+        inputElement.type = "text"
+        tempElement.appendChild(inputElement)
+
+        let created
+
+        function launch(p)
+        {
+            if (created) {return;}
+            created = true
+            if (inputElement.value != "")
+            {
+                onFinalize(inputElement.value)
+            }
+
+            tempElement.remove()
+            p.temp_item = null
+        }
+
+        fitText(inputElement, .5)
+
+        inputElement.onkeydown = (e) => {
+            if (e.key == "Enter")
+                launch(this)
+        }
+        inputElement.onblur = () => {launch(this)}
+
+        console.log(this)
+
+        this.el.appendChild(tempElement)
+
+        inputElement.focus()
+
+        this.tempElement = tempElement
     }
 
     render(parent)
@@ -101,7 +188,9 @@ class SideBarList
         if (this.height)
             list.style.height = this.height
 
-        parent.appendChild(list)
+        this.el = list
+
+        parent.pageElement.appendChild(list)
     }
 }
 
@@ -123,26 +212,29 @@ class SideBarPage
     {
         const pageElement = document.createElement("div")
         pageElement.classList.add("side-bar-page")
-        pageElement.style.visibility = "hidden"
+        pageElement.style.display = "none"
         sideBarPageContainer.appendChild(pageElement)
 
         this.pageElement = pageElement
 
-        const buttons = Object.keys(parent.pages).length
+        if (parent.options.navigation)
+        {
+            const buttons = Object.keys(parent.pages).length
 
-        const pageSelect = document.createElement("div")
-        pageSelect.classList.add("side-bar-select-button")
-        pageSelect.style.width = `calc(var(--main-side-bar-space) / ${buttons})`
-        pageSelect.innerHTML = this.displayName
-        fitText(pageSelect, .7)
+            const pageSelect = document.createElement("div")
+            pageSelect.classList.add("side-bar-select-button")
+            pageSelect.style.width = `calc(var(--main-side-bar-space) / ${buttons})`
+            pageSelect.innerHTML = this.displayName
+            fitText(pageSelect, .7)
 
-        pageSelect.onclick = () => {
-            parent.setActivePage(this.name)
+            pageSelect.onclick = () => {
+                parent.setActivePage(this.name)
+            }
+
+            sideBarSelect.appendChild(pageSelect)
+
+            this.pageSelect = pageSelect
         }
-
-        sideBarSelect.appendChild(pageSelect)
-
-        this.pageSelect = pageSelect
 
         this.items.map((item) => {
             item.render(this)
@@ -152,8 +244,11 @@ class SideBarPage
 
 class SideBar
 {
-    constructor()
+    constructor(title, options)
     {
+        this.title = title
+        this.options = options || {}
+
         this.pages = {}
         this.activePage = null
     }
@@ -170,15 +265,21 @@ class SideBar
         Object.keys(this.pages).map((key) => {
             const page = this.pages[key];
             const active = name == page.name;
-            page.pageSelect.className = `side-bar-select-button ${active?"selected":""}`
-            page.pageElement.style.visibility = active?"visible":"hidden"
+            page.pageElement.style.display = active?"flex":"none"
+
+            if (this.options.navigation)
+            {
+                page.pageSelect.className = `side-bar-select-button ${active?"selected":""}`
+            }
         })
     }
 
     render()
     {
+        if (!this.options.navigation)
+            document.getElementById("side-bar-select").remove()
+
         Object.keys(this.pages).map((key) => {
-            console.log("render", key)
             const page = this.pages[key]
             page.render(this)
         })
@@ -191,13 +292,22 @@ class MiniSideBar
 {
     constructor()
     {
-        this.selected = ""
+        this.selected = undefined
         this.buttons = {}
     }
     
     addButton(button)
     {
         this.buttons[button.name] = button
+    }
+
+    select(selected)
+    {
+        this.selected = selected;
+
+        Object.keys(this.buttons).map((key) => {
+            this.buttons[key].toggleSelected(this.selected == key)
+        })
     }
 
     render()
@@ -225,8 +335,16 @@ class MiniSideBarButton
         const el = document.createElement("div")
         el.classList.add("mini-bar-side-button")
 
-        el.onclick = () => {action(parent)}
-        el.style.backgroundImage = `url(${this.icon})`
+        el.onclick = () => {this.action(this, miniSideBar)}
+
+        const borderEl = document.createElement("div")
+        borderEl.classList.add("border")
+        el.appendChild(borderEl)
+
+        const imgEl = document.createElement("div")
+        imgEl.classList.add("image")
+        imgEl.style.backgroundImage = `url(${this.icon})`
+        el.appendChild(imgEl)
 
         const parent = this.location=="top"?miniSideBarTop:miniSideBarBot
         parent.appendChild(el)

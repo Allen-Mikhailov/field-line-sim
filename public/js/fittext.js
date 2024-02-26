@@ -16,7 +16,7 @@
       return obj;
     };
   
-    window.fitText = function (el, kompressor, options) {
+    window.fitText = function (el, xKompressor, yKompressor, options) {
   
       var settings = extend({
         'minFontSize' : -1/0,
@@ -25,12 +25,13 @@
       },options);
   
       var fit = function (el) {
-        var compressor = kompressor || 1;
+        var xCompressor = xKompressor || 1;
+        var yCompressor = yKompressor || xCompressor;
   
         var resizer = function () {
           const bounds = el.getBoundingClientRect()
-          const width = bounds.width * compressor
-          const height = bounds.height * compressor
+          const width = bounds.width * xCompressor
+          const height = bounds.height * yCompressor
 
           if (bounds.width == 0 || bounds.height == 0)
             return setTimeout(resizer, 100)
@@ -44,14 +45,13 @@
           // const font_size = test_val*height/measureH
           el.style.fontSize = font_size+"px"
 
-          if (el.innerHTML == "FIELD LINE SIMULATOR")
-            console.log("updates", width, height, measure.width, measureH, font_size)
         };
   
         // Call once to set.
         resizer();
 
         addEvent(window, 'resize', resizer);
+        addEvent(window, 'change', resizer);
         addEvent(window, 'orientationchange', resizer);
       };
   
