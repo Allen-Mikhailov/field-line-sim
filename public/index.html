@@ -6,12 +6,11 @@
   <link rel="stylesheet" href="./css/index.css">
   <title>Field Line Simulation</title>
 </head>
-<body>
-  <div style="position: absolute; left: 0%; top: 0%; font-size: 16px;">testting</div>
-  <div id="tab-bar">
-    <div id="tab-bar-title">FIELD LINE SIMULATOR</div>
+<body style="display: flex; flex-direction: column;">
+  <div id="tool-bar">
+    <div id="tool-bar-title">FIELD LINE SIMULATOR</div>
   </div>
-  <div id="main-container">
+  <div id="main-container" style="flex-grow: 1;">
     <div id="mini-side-bar">
       <div class="top"></div>
       <div class="bot"></div>
@@ -22,11 +21,14 @@
       <div id="side-bar-page-container"></div>
     </div>
     <div style="flex-grow: 1; display: flex; flex-direction: column;">
-      <div id="tool-bar"></div>
-      <div id ="content-container">
-        <canvas id="line-canvas" class="canvas"></canvas>
-        <canvas id="decor-canvas" class="canvas"></canvas>
-        <div id="charge-container" class="canvas"></div>
+      <div id="tab-bar"></div>
+      <div id ="alls-tab-container">
+        <div id="simulation-tab" style="visibility: hidden;">
+          <canvas id="line-canvas" class="canvas"></canvas>
+          <canvas id="decor-canvas" class="canvas"></canvas>
+          <div id="charge-container" class="canvas"></div>
+        </div>
+        
       </div>
     </div>
     
@@ -34,7 +36,7 @@
   
 
   <script type="module" src="./js/fittext.js"></script>
-  <script type="module" src="./js/bar-use.js"></script>
   <script type="module" src="./js/index.js"></script>
+  <script type="module" src="./js/bar-use.js"></script>
 </body>
 </html>

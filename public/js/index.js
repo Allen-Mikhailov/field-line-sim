@@ -41,25 +41,7 @@ let field_line_floats = []
 const ctx = canvas.getContext("2d")
 const charge_divs = {}
 
-const charges = {
-    "test-charge": {
-        x: 0,
-        y: 0,
-        q: -1,
-        type: 0,
-    },
-}
-
-for (let i = 0; i < 3; i++)
-{
-    const newCharge = {
-        x: (Math.random()-.5)*2 * 35,
-        y: (Math.random()-.5)*2 * 20,
-        q: 1,
-        type: 0
-    }
-    charges[""+i] = newCharge
-}
+let charges = {}
 
 console.log(charges)
 
@@ -275,3 +257,8 @@ init().then(async () => {
     update_field_lines()
     render_update()
 });
+
+function updateCharges(simulation)
+{
+    
+}

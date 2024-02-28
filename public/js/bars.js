@@ -5,10 +5,12 @@ const miniSideBar = document.getElementById("mini-side-bar")
 const miniSideBarTop = miniSideBar.children[0]
 const miniSideBarBot = miniSideBar.children[1]
 
+const allsTabContainer = document.getElementById("alls-tab-container")
+
 const sideBarSelect = document.getElementById("side-bar-select")
 const sideBarPageContainer = document.getElementById("side-bar-page-container")
 
-fitText(document.getElementById("tab-bar-title"), .5)
+fitText(document.getElementById("tool-bar-title"), .5)
 fitText(document.getElementById("side-bar-title"), .8)
 
 class SideBarPageActionBar
@@ -36,7 +38,7 @@ class SideBarPageActionBar
         {
             const titleEl = document.createElement("div")
             titleEl.classList.add("side-bar-page-action-bar-title")
-            titleEl.innerHTML = this.title
+            titleEl.innerText = this.title
             container.appendChild(titleEl)
 
             fitText(titleEl, .7)
@@ -76,6 +78,11 @@ class SideBarList
             this.height = height
     }
 
+    setMainAction(main_action)
+    {
+        this.main_action = main_action
+    }
+
     updateItems(new_items)
     {
         this.items = new_items
@@ -98,9 +105,11 @@ class SideBarList
                 el = document.createElement("div")
                 el.classList.add("side-bar-page-list-item")
 
+                el.onclick = () => this.main_action(key)
+
                 const titleEl = document.createElement("div")
                 titleEl.classList.add("title")
-                titleEl.innerHTML = this.items[key].displayName
+                titleEl.innerText = this.items[key].displayName
                 el.appendChild(titleEl)
 
                 fitText(titleEl, .5)
@@ -126,8 +135,9 @@ class SideBarList
         })
     }
 
-    updateSelected()
+    updateSelected(select)
     {
+        this.selected = select
         Object.keys(this.items).map((key) => {
             let el = this.item_divs[key]
             el.className = `side-bar-page-list-item ${this.selected==key?"selected":""}`
@@ -224,7 +234,7 @@ class SideBarPage
             const pageSelect = document.createElement("div")
             pageSelect.classList.add("side-bar-select-button")
             pageSelect.style.width = `calc(var(--main-side-bar-space) / ${buttons})`
-            pageSelect.innerHTML = this.displayName
+            pageSelect.innerText = this.displayName
             fitText(pageSelect, .7)
 
             pageSelect.onclick = () => {
@@ -358,4 +368,140 @@ class MiniSideBarButton
     }
 }
 
-export {SideBar, SideBarPage, SideBarPageActionBar, SideBarList, MiniSideBar, MiniSideBarButton}
+class Tabs
+{
+    constructor()
+    {
+        this.tabs = {}
+        this.selectedTab = null
+    }
+
+    selectRawTab(tab)
+    {
+        if (this.selectedTab)
+            this.selectedTab.close()
+
+        this.selectedTab = tab
+
+        if (tab)
+            tab.render()
+
+        Object.keys(this.tabs).map((key) => {
+            const ctab = this.tabs[key]
+            if (ctab.buttonEl)
+                ctab.buttonEl.className = `tab-button ${ctab==tab?"selected":""}`
+        })
+    }
+
+    selectTab(tab)
+    {
+        this.selectRawTab(this.selectedTab == tab?null:tab)
+    }
+
+    removeTab(tab)
+    {
+        if (tab.buttonEl)
+            tab.buttonEl.remove()
+        
+        delete this.tabs[tab.id]
+        
+        if (this.selectedTab == tab)
+        {
+            tab.close()
+            let newSelect = null
+            Object.keys(this.tabs).map((tabId) => {
+                newSelect = this.tabs[tabId]
+            })
+            this.selectRawTab(newSelect)
+        }
+    }
+
+    addTab(tab)
+    {
+        const tabButtonEl = document.createElement("div")
+        tabButtonEl.classList.add("tab-button")
+
+        tabButtonEl.onclick = () => this.selectTab(tab)
+
+        const tabButtonTitle = document.createElement("div")
+        tabButtonTitle.classList.add("tab-button-title")
+        tabButtonTitle.innerText = tab.displayName
+        tabButtonEl.appendChild(tabButtonTitle)
+
+        fitText(tabButtonTitle, 100, .4)
+
+        const tabButtonX = document.createElement("div")
+        tabButtonX.classList.add("small-button")
+        tabButtonX.style.backgroundImage = `url("/imgs/x.png")`
+        tabButtonX.onclick = () => {this.removeTab(tab)}
+        tabButtonEl.appendChild(tabButtonX)
+
+        const tabBorderRemovalTop = document.createElement("div")
+        tabBorderRemovalTop.className = "anti-border top"
+        tabButtonEl.appendChild(tabBorderRemovalTop)
+
+        const tabBorderRemovalBottom = document.createElement("div")
+        tabBorderRemovalBottom.className = "anti-border bottom"
+        tabButtonEl.appendChild(tabBorderRemovalBottom)
+
+        if (this.tabs[tab.id])
+            removeTab(this.tabs[tab.id])
+
+        tab.buttonEl = tabButtonEl
+        this.tabs[tab.id] = tab
+
+        tabBar.appendChild(tabButtonEl)
+    }
+
+    removeTab(tab)
+    {
+        if (tab.buttonEl)
+            tab.buttonEl.remove()
+
+        if (tab.tabContainer)
+            tab.tabContainer.remove()
+
+        delete this.tabs[tab.id]
+    }
+}
+
+class Tab
+{
+    constructor(id, displayName)
+    {
+        this.id = id
+        this.displayName= displayName || id
+    }
+
+    render()
+    {
+        const tabContainer = document.createElement("div")
+        tabContainer.classList.add("tab-container")
+
+        allsTabContainer.appendChild(tabContainer)
+
+        this.containerEl = tabContainer
+
+        return tabContainer
+    }
+
+    close()
+    {
+        if (this.containerEl)
+            this.containerEl.remove()
+    }
+}
+
+export {
+    SideBar, 
+    SideBarPage, 
+    SideBarPageActionBar, 
+    SideBarList, 
+    
+    MiniSideBar, 
+    MiniSideBarButton,
+
+    Tabs,
+    Tab
+
+}

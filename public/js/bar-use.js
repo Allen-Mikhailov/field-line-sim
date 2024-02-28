@@ -1,4 +1,15 @@
-import { SideBar, SideBarPage, SideBarPageActionBar, SideBarList, MiniSideBarButton, MiniSideBar } from "./bars.js"
+import { 
+    SideBar, 
+    SideBarPage, 
+    SideBarPageActionBar, 
+    SideBarList, 
+    
+    MiniSideBarButton, 
+    MiniSideBar, 
+    
+    Tabs, 
+    Tab 
+} from "./bars.js"
 
 const dataKey = "simulation-data:0.0"
 
@@ -16,6 +27,27 @@ function updateSimulationData()
     updateSimulationList(simulationsData)
 }
 
+function createDefaultObjects(objects)
+{
+    objects["test-charge"] = {
+        x: 0,
+        y: 0,
+        q: -1,
+        type: 0,
+    }
+    
+    for (let i = 0; i < 3; i++)
+    {
+        const newCharge = {
+            x: (Math.random()-.5)*2 * 35,
+            y: (Math.random()-.5)*2 * 20,
+            q: 1,
+            type: 0
+        }
+        objects[""+i] = newCharge
+    }
+}
+
 function createNewSimulation(name)
 {
     const newSimulation = {
@@ -27,6 +59,8 @@ function createNewSimulation(name)
 
         }
     }
+
+    createDefaultObjects(newSimulation.objects)
 
     simulationsData[name] = newSimulation
     updateSimulationData()
@@ -40,15 +74,56 @@ function removeSimulation(name)
 
 const sideBar = new SideBar()
 const miniSideBar = new MiniSideBar();
+const tabs = new Tabs();
+
+class SimulationTab extends Tab
+{
+    constructor(id)
+    {
+        super(id, id);
+    }
+
+    render()
+    {
+        const container = super.render()
+
+        const simulationTab = document.getElementById("simulation-tab")
+        simulationTab.style.visibility = "visible"
+    }
+
+    close()
+    {
+        super.close()
+        const simulationTab = document.getElementById("simulation-tab")
+        simulationTab.style.visibility = "hidden"
+    }
+}
 
 const simulationsPage = new SideBarPage("simulations", "Simulations")
 const simulationActionBar = new SideBarPageActionBar("Simulations")
 simulationsPage.addItem(simulationActionBar)
 
+
+
 const simulationsList = new SideBarList([{
     "img": "/imgs/clear.png",
     "fun": (key) => {removeSimulation(key)}
 }])
+
+function selectListItem(key)
+{
+    simulationsList.updateSelected(key)
+
+    if (tabs.tabs[key])
+    {
+        tabs.selectTab(tabs.tabs[key])
+    } else {
+        const newTab = new SimulationTab(key)
+        tabs.addTab(newTab)
+    }
+}
+simulationsList.setMainAction(selectListItem)
+
 updateSimulationList = (items) => simulationsList.updateItems(items)
 simulationActionBar.addAction({
     "img": "/imgs/plus.png", 
@@ -101,7 +176,5 @@ miniSideBar.render()
 
 sideBar.setActivePage("simulations")
 SimulationsButton.toggleSelected(true)
-
-
 
 updateSimulationData()
