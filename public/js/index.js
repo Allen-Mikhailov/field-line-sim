@@ -43,7 +43,7 @@ const charge_divs = {}
 
 let charges = {}
 
-console.log(charges)
+let initialized = false
 
 function getScreenPos(x, y)
 {
@@ -253,12 +253,20 @@ window.addEventListener('resize', render_update);
 
 init().then(async () => {
     farValue = Vector2.neg1().get_x()
-
-    update_field_lines()
-    render_update()
+    initialized = true
 });
 
 function updateCharges(simulation)
 {
-    
+    charges = simulation.objects
+    console.log(charges)
+    update_field_lines()
+    render_update()
 }
+
+function isInitialized()
+{
+    return initialized
+}
+
+export {updateCharges, isInitialized}

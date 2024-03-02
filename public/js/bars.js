@@ -1,3 +1,5 @@
+import fitText from "./fittext.js"
+
 const tabBar = document.getElementById("tab-bar")
 const toolBar = document.getElementById("tool-bar")
 const sideBar = document.getElementById("side-bar")
@@ -402,10 +404,13 @@ class Tabs
     {
         if (tab.buttonEl)
             tab.buttonEl.remove()
+
+        if (tab.tabContainer)
+            tab.tabContainer.remove()
         
         delete this.tabs[tab.id]
         
-        if (this.selectedTab == tab)
+        if (this.selectedTab === tab)
         {
             tab.close()
             let newSelect = null
@@ -433,7 +438,10 @@ class Tabs
         const tabButtonX = document.createElement("div")
         tabButtonX.classList.add("small-button")
         tabButtonX.style.backgroundImage = `url("/imgs/x.png")`
-        tabButtonX.onclick = () => {this.removeTab(tab)}
+        tabButtonX.onclick = (e) => {
+            this.removeTab(tab)
+            e.stopPropagation()
+        }
         tabButtonEl.appendChild(tabButtonX)
 
         const tabBorderRemovalTop = document.createElement("div")
@@ -445,23 +453,12 @@ class Tabs
         tabButtonEl.appendChild(tabBorderRemovalBottom)
 
         if (this.tabs[tab.id])
-            removeTab(this.tabs[tab.id])
+            this.removeTab(this.tabs[tab.id])
 
         tab.buttonEl = tabButtonEl
         this.tabs[tab.id] = tab
 
         tabBar.appendChild(tabButtonEl)
-    }
-
-    removeTab(tab)
-    {
-        if (tab.buttonEl)
-            tab.buttonEl.remove()
-
-        if (tab.tabContainer)
-            tab.tabContainer.remove()
-
-        delete this.tabs[tab.id]
     }
 }
 

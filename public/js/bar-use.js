@@ -11,6 +11,9 @@ import {
     Tab 
 } from "./bars.js"
 
+import fitText from "./fittext.js"
+import { updateCharges, isInitialized } from "./index.js"
+
 const dataKey = "simulation-data:0.0"
 
 let selected = "simulations"
@@ -27,9 +30,9 @@ function updateSimulationData()
     updateSimulationList(simulationsData)
 }
 
-function createDefaultObjects(objects)
+function createDefaultObjects(simulation)
 {
-    objects["test-charge"] = {
+    simulation.objects["test-charge"] = {
         x: 0,
         y: 0,
         q: -1,
@@ -44,7 +47,7 @@ function createDefaultObjects(objects)
             q: 1,
             type: 0
         }
-        objects[""+i] = newCharge
+        simulation.objects[""+i] = newCharge
     }
 }
 
@@ -60,7 +63,7 @@ function createNewSimulation(name)
         }
     }
 
-    createDefaultObjects(newSimulation.objects)
+    createDefaultObjects(newSimulation)
 
     simulationsData[name] = newSimulation
     updateSimulationData()
@@ -80,7 +83,8 @@ class SimulationTab extends Tab
 {
     constructor(id)
     {
-        super(id, id);
+        super(SimulationTab.createId(id), id);
+        this.simulationId = id;
     }
 
     render()
@@ -88,22 +92,27 @@ class SimulationTab extends Tab
         const container = super.render()
 
         const simulationTab = document.getElementById("simulation-tab")
-        simulationTab.style.visibility = "visible"
+        simulationTab.style.display = "block"
+
+        updateCharges(simulationsData[this.simulationId])
     }
 
     close()
     {
         super.close()
         const simulationTab = document.getElementById("simulation-tab")
-        simulationTab.style.visibility = "hidden"
+        simulationTab.style.display = "none"
+    }
+
+    static createId(key)
+    {
+        return "simulation:"+key
     }
 }
 
 const simulationsPage = new SideBarPage("simulations", "Simulations")
 const simulationActionBar = new SideBarPageActionBar("Simulations")
 simulationsPage.addItem(simulationActionBar)
-
-
 
 const simulationsList = new SideBarList([{
     "img": "/imgs/clear.png",
@@ -114,12 +123,13 @@ function selectListItem(key)
 {
     simulationsList.updateSelected(key)
 
-    if (tabs.tabs[key])
+    if (tabs.tabs[SimulationTab.createId(key)])
     {
-        tabs.selectTab(tabs.tabs[key])
+        tabs.selectTab(tabs.tabs[SimulationTab.createId(key)])
     } else {
         const newTab = new SimulationTab(key)
         tabs.addTab(newTab)
+        tabs.selectTab(tabs.tabs[SimulationTab.createId(key)])
     }
 }
 simulationsList.setMainAction(selectListItem)

@@ -464,7 +464,7 @@ body {
 
     overflow: hidden;
 
-    background-color: red;
+    /* background-color: red; */
 }
 
 .charge {
@@ -475,7 +475,7 @@ body {
     box-sizing: border-box;
     translate: -50% -50%;
 
-    transition: all .5s;
+    transition: scale .5s;
 }
 
 .charge:hover {
