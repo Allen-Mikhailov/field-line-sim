@@ -67,17 +67,18 @@ class SideBarPageActionBar
 
 class SideBarList
 {
-    constructor(item_actions, height)
+    constructor()
     {
         this.items = {}
         this.item_divs = {}
-        this.item_actions = item_actions
         this.selected = ""
-
+        this.item_actions = []
         this.temp_item = null
+    }
 
-        if (height)
-            this.height = height
+    setItemActions(item_actions)
+    {
+        this.item_actions = item_actions
     }
 
     setMainAction(main_action)
@@ -88,7 +89,6 @@ class SideBarList
     updateItems(new_items)
     {
         this.items = new_items
-        console.log("new Items", new_items)
 
         // Removing Old Items
         Object.keys(this.item_divs).map((key) => {
@@ -107,7 +107,10 @@ class SideBarList
                 el = document.createElement("div")
                 el.classList.add("side-bar-page-list-item")
 
-                el.onclick = () => this.main_action(key)
+                el.onclick = (e) => {
+                    this.main_action(key);
+                    e.stopPropagation()
+                }
 
                 const titleEl = document.createElement("div")
                 titleEl.classList.add("title")
@@ -122,7 +125,10 @@ class SideBarList
                 this.item_actions.map(({img, fun}) => {
                     const actionEl = document.createElement("div")
                     actionEl.classList.add("small-button")
-                    actionEl.onclick = () => fun(key)
+                    actionEl.onclick = (e) => {
+                        fun(key)
+                        e.stopPropagation()
+                    }
                     actionEl.style.backgroundImage = `url(${img})`
 
                     buttonContainer.appendChild(actionEl)
@@ -332,14 +338,18 @@ class MiniSideBar
 
 class MiniSideBarButton
 {
-    constructor(name, icon, action, location)
+    constructor(name, icon, location)
     {
         this.name = name;
         this.icon = icon;
-        this.action = action;
         this.location = location;
 
         this.el = undefined;
+    }
+
+    addAction(action)
+    {
+        this.action = action
     }
 
     render(miniSideBar)

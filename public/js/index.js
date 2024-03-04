@@ -41,6 +41,8 @@ let field_line_floats = []
 const ctx = canvas.getContext("2d")
 const charge_divs = {}
 
+let CreateChargeDiv = (charge) => {}
+
 let charges = {}
 
 let initialized = false
@@ -100,6 +102,7 @@ function drawCharges()
 
             charge_divs[key] = div
             charge_div_container.appendChild(div)
+            CreateChargeDiv(key, div)
         }
 
         div.style.borderColor = obj.q > 0? "blue":"red"
@@ -111,6 +114,17 @@ function drawCharges()
 
         div.style.left = screen_pos[0]+"px"
         div.style.top = screen_pos[1]+"px"
+    })
+
+    Object.keys(charge_divs).map((key) => {
+        const obj = charges[key] 
+        const div = charge_divs[key]
+
+        if (!obj)
+        {
+            div.remove()
+            delete charge_divs[key]
+        }
     })
 }
 
@@ -259,7 +273,6 @@ init().then(async () => {
 function updateCharges(simulation)
 {
     charges = simulation.objects
-    console.log(charges)
     update_field_lines()
     render_update()
 }

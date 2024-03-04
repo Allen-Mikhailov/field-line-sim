@@ -14,15 +14,34 @@ import {
 import fitText from "./fittext.js"
 import { updateCharges, isInitialized } from "./index.js"
 
+// Getting Data
 const dataKey = "simulation-data:0.0"
+let simulationsData = JSON.parse(localStorage.getItem(dataKey) || "{}")
+console.log("Similation Data: ", simulationsData)
 
 let selected = "simulations"
+let selectedObject
 
-let simulationsData = JSON.parse(localStorage.getItem(dataKey) || "{}")
-console.log(simulationsData)
+const sideBar = new SideBar()
+const miniSideBar = new MiniSideBar();
+const tabs = new Tabs();
+
+// Simulations Page
+const simulationsPage = new SideBarPage("simulations", "Simulations")
+const simulationActionBar = new SideBarPageActionBar("Simulations")
+const simulationsList = new SideBarList()
+
+// Objects Page
+const objectsPage = new SideBarPage("objects", "Objects")
+const objectsActionBar = new SideBarPageActionBar("Objects")
+const objectsList = new SideBarList()
+const objectPropertiesActionBar = new SideBarPageActionBar("Properties")
+
+const SimulationsButton = new MiniSideBarButton("simulations", "/imgs/file.png", "top")
+const ObjectsButton = new MiniSideBarButton("objects", "/imgs/shapes.png", "top")
+const SettingsButton = new MiniSideBarButton("settings", "/imgs/settings.png", "bot")
 
 let updateSimulationList = undefined
-
 
 function updateSimulationData()
 {
@@ -30,24 +49,48 @@ function updateSimulationData()
     updateSimulationList(simulationsData)
 }
 
+function getSelectedSimulation()
+{
+    return (tabs.selectedTab||{}).simulationId
+}
+
+function reloadSim()
+{
+    objectsList.updateItems(simulationsData[getSelectedSimulation()].objects)
+    updateCharges(simulationsData[getSelectedSimulation()])
+    updateSimulationData()
+}
+
+function createKey() {
+    return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c =>
+        (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+    );
+}
+
+function randomCharge(name)
+{
+    return {
+        x: (Math.random()-.5)*2 * 35,
+        y: (Math.random()-.5)*2 * 20,
+        q: 1,
+        type: 0,
+        displayName: name
+    }
+}
+
 function createDefaultObjects(simulation)
 {
-    simulation.objects["test-charge"] = {
+    simulation.objects["Neg 1"] = {
         x: 0,
         y: 0,
         q: -1,
         type: 0,
+        displayName: "Neg 1"
     }
     
     for (let i = 0; i < 3; i++)
     {
-        const newCharge = {
-            x: (Math.random()-.5)*2 * 35,
-            y: (Math.random()-.5)*2 * 20,
-            q: 1,
-            type: 0
-        }
-        simulation.objects[""+i] = newCharge
+        simulation.objects["Pos "+i] = randomCharge("Pos "+i)
     }
 }
 
@@ -69,15 +112,32 @@ function createNewSimulation(name)
     updateSimulationData()
 }
 
+function createNewObject(name)
+{
+    const simulation = simulationsData[getSelectedSimulation()]
+    simulation.objects[createKey()] = randomCharge(name)
+
+    reloadSim()
+}
+
 function removeSimulation(name)
 {
     delete simulationsData[name]
     updateSimulationData()
 }
 
-const sideBar = new SideBar()
-const miniSideBar = new MiniSideBar();
-const tabs = new Tabs();
+function removeObject(key)
+{
+    const simulationId = getSelectedSimulation()
+    const simulation = simulationsData[simulationId]
+    if (!simulation)
+        return console.log("no simulation with key \""+simulationId+"\" found")
+
+    if (!simulation.objects[key])
+        return console.log("No object with key \""+key+"\" in simulation \""+simulationId+"\" found")
+    delete simulation.objects[key]
+    reloadSim()
+}
 
 class SimulationTab extends Tab
 {
@@ -94,7 +154,7 @@ class SimulationTab extends Tab
         const simulationTab = document.getElementById("simulation-tab")
         simulationTab.style.display = "block"
 
-        updateCharges(simulationsData[this.simulationId])
+        reloadSim()
     }
 
     close()
@@ -110,15 +170,6 @@ class SimulationTab extends Tab
     }
 }
 
-const simulationsPage = new SideBarPage("simulations", "Simulations")
-const simulationActionBar = new SideBarPageActionBar("Simulations")
-simulationsPage.addItem(simulationActionBar)
-
-const simulationsList = new SideBarList([{
-    "img": "/imgs/clear.png",
-    "fun": (key) => {removeSimulation(key)}
-}])
-
 function selectListItem(key)
 {
     simulationsList.updateSelected(key)
@@ -132,23 +183,11 @@ function selectListItem(key)
         tabs.selectTab(tabs.tabs[SimulationTab.createId(key)])
     }
 }
-simulationsList.setMainAction(selectListItem)
 
-updateSimulationList = (items) => simulationsList.updateItems(items)
-simulationActionBar.addAction({
-    "img": "/imgs/plus.png", 
-    "fun": () => simulationsList.createTempItem(createNewSimulation)}
-)
+function selectObjectListItem(key)
+{
 
-simulationsPage.addItem(simulationsList)
-
-
-const objectsPage = new SideBarPage("objects", "Objects")
-
-sideBar.addPage(simulationsPage)
-sideBar.addPage(objectsPage)
-
-sideBar.render()
+}
 
 function updateSelected(nselected)
 {
@@ -157,26 +196,41 @@ function updateSelected(nselected)
     miniSideBar.select(selected)
 }
 
-const SimulationsButton = new MiniSideBarButton(
-    "simulations", 
-    "/imgs/file.png", 
-    ()=>{updateSelected(selected=="simulations"?null:"simulations")}, 
-    "top"
+simulationsList.setMainAction(selectListItem)
+simulationsList.setItemActions([{
+    "img": "/imgs/clear.png",
+    "fun": (key) => {removeSimulation(key)}
+}])
+updateSimulationList = (items) => simulationsList.updateItems(items)
+simulationActionBar.addAction({
+    "img": "/imgs/plus.png", 
+    "fun": () => simulationsList.createTempItem(createNewSimulation)}
 )
 
-const ObjectsButton = new MiniSideBarButton(
-    "objects", 
-    "/imgs/shapes.png", 
-    ()=>{updateSelected(selected=="objects"?null:"objects")},  
-    "top"
-)
+simulationsPage.addItem(simulationActionBar)
+simulationsPage.addItem(simulationsList)
 
-const SettingsButton = new MiniSideBarButton(
-    "settings", 
-    "/imgs/settings.png", 
-    ()=>{console.log("tests")}, 
-    "bot"
-    )
+objectsActionBar.addAction({
+    "img": "/imgs/plus.png", 
+    "fun": () => objectsList.createTempItem(createNewObject)
+})
+
+objectsList.setItemActions([{
+    "img": "/imgs/clear.png",
+    "fun": (key) => removeObject(key)
+}])
+
+objectsPage.addItem(objectsActionBar)
+objectsPage.addItem(objectsList)
+
+sideBar.addPage(simulationsPage)
+sideBar.addPage(objectsPage)
+
+sideBar.render()
+
+SimulationsButton.addAction(()=>{updateSelected(selected=="simulations"?null:"simulations")})
+ObjectsButton.addAction(()=>{updateSelected(selected=="objects"?null:"objects")})
+SettingsButton.addAction(()=>{console.log("settings")})
 
 miniSideBar.addButton(SimulationsButton)
 miniSideBar.addButton(ObjectsButton)

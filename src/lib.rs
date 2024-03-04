@@ -37,7 +37,7 @@ impl Vector2
     pub fn new(x: f32, y: f32) -> Vector2 {
         Vector2 {x, y}
     }
-
+    
     pub fn from_angle(a: f32, mag: f32) -> Vector2
     { return Vector2 { x: (a.cos()*mag), y: (a.sin()*mag) } }
 
