@@ -212,6 +212,14 @@ class SideBarList
     }
 }
 
+class SideBarProperties
+{
+    constructor(property_types)
+    {
+        this.property_types = property_types
+    }
+}
+
 class SideBarPage
 {
     constructor(name, displayName)
@@ -504,6 +512,7 @@ export {
     SideBarPage, 
     SideBarPageActionBar, 
     SideBarList, 
+    SideBarProperties,
     
     MiniSideBar, 
     MiniSideBarButton,

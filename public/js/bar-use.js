@@ -212,7 +212,10 @@ simulationsPage.addItem(simulationsList)
 
 objectsActionBar.addAction({
     "img": "/imgs/plus.png", 
-    "fun": () => objectsList.createTempItem(createNewObject)
+    "fun": () => {
+        if (getSelectedSimulation())
+            objectsList.createTempItem(createNewObject)
+    }
 })
 
 objectsList.setItemActions([{
@@ -222,6 +225,7 @@ objectsList.setItemActions([{
 
 objectsPage.addItem(objectsActionBar)
 objectsPage.addItem(objectsList)
+objectsPage.addItem(objectPropertiesActionBar)
 
 sideBar.addPage(simulationsPage)
 sideBar.addPage(objectsPage)
