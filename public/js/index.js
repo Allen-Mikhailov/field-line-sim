@@ -5,6 +5,14 @@ const charge_div_container = document.getElementById("charge-container")
 const canvas = document.getElementById("line-canvas")
 const decor_canvas = document.getElementById("decor-canvas")
 
+const ChargeTypeToInt = {
+    "Point": 0,
+    "Sphere": 1,
+    "Line": 2
+}
+
+const IntToChargeType = ["Point", "Sphere", "Line"]
+
 import init, { Simulation, Vector2 } from "/pkg/field_line_sim.js";
 
 // Based on X
@@ -282,4 +290,4 @@ function isInitialized()
     return initialized
 }
 
-export {updateCharges, isInitialized}
+export {updateCharges, isInitialized, ChargeTypeToInt, IntToChargeType}

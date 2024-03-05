@@ -214,9 +214,104 @@ class SideBarList
 
 class SideBarProperties
 {
-    constructor(property_types)
+    constructor()
     {
-        this.property_types = property_types
+        this.get_properties = null
+        this.on_update = null
+        this.propertyEls = {}
+        this.object = {}
+    }
+
+    setOnUpdate(on_update)
+    {
+        this.on_update = on_update
+    }
+
+    setGetProperties(get_properties)
+    {
+        this.get_properties = get_properties
+    }
+
+    updateObject(object)
+    {
+        this.object = object
+        const properties = this.get_properties(object)
+        const propertyStrings = {}
+
+        properties.map((property, index) => {
+            const string = property.name + ":" + property.type
+            propertyStrings[string] = property
+
+            let els = this.propertyEls[string]
+
+            if (!els)
+            {
+                const propertyContainer = document.createElement("div")
+                propertyContainer.style.order = ""+index
+                els = {
+                    "container": propertyContainer
+                }
+
+                switch(property.type)
+                {
+                    case "float":
+                        propertyContainer.className = "float-container"
+
+                        // Label
+                        const label = document.createElement("div")
+                        label.className = "property-label"
+                        els["label"] = label
+                        propertyContainer.appendChild(label)
+
+                        const input = document.createElement("input")
+                        input.type = "number"
+                        input.className = "property-float"
+                        input.onblur = ((e) => {
+                            this.on_update(property.name, parseFloat(input.value))
+                        })
+                        input.onkeydown = ((e) => {
+                            if (e.key == "Enter")
+                                input.blur()
+                        })
+                        els["input"] = input
+                        propertyContainer.appendChild(input)
+
+                        break;
+                }
+                
+                this.propertyEls[string] = els
+                this.el.appendChild(propertyContainer)
+            }
+
+            switch (property.type)
+            {
+                case "float":
+                    els["label"].innerText = property.displayName
+                    els["input"].value = object[property.name]
+                    break;
+            }
+        })
+
+        // Removing Old Elements
+        Object.keys(this.propertyEls).map((pString) => {
+            if (!propertyStrings[pString])
+            {
+                Object.keys(this.propertyEls[pString]).map((key) => {
+                    this.propertyEls[pString][key].remove()
+                })
+                delete this.propertyEls[pString]
+            }
+        })
+    }
+
+    render(parent)
+    {
+        const list = document.createElement("div")
+        list.classList.add("side-bar-page-properties")
+
+        this.el = list
+
+        parent.pageElement.appendChild(list)
     }
 }
 

@@ -3,6 +3,7 @@ import {
     SideBarPage, 
     SideBarPageActionBar, 
     SideBarList, 
+    SideBarProperties,
     
     MiniSideBarButton, 
     MiniSideBar, 
@@ -12,7 +13,7 @@ import {
 } from "./bars.js"
 
 import fitText from "./fittext.js"
-import { updateCharges, isInitialized } from "./index.js"
+import { updateCharges, isInitialized, ChargeTypeToInt, IntToChargeType } from "./index.js"
 
 // Getting Data
 const dataKey = "simulation-data:0.0"
@@ -36,6 +37,7 @@ const objectsPage = new SideBarPage("objects", "Objects")
 const objectsActionBar = new SideBarPageActionBar("Objects")
 const objectsList = new SideBarList()
 const objectPropertiesActionBar = new SideBarPageActionBar("Properties")
+const objectProperties = new SideBarProperties()
 
 const SimulationsButton = new MiniSideBarButton("simulations", "/imgs/file.png", "top")
 const ObjectsButton = new MiniSideBarButton("objects", "/imgs/shapes.png", "top")
@@ -184,9 +186,78 @@ function selectListItem(key)
     }
 }
 
+function getObjectProperties(object)
+{
+    const properties = []
+    
+    // Name
+    properties.push({
+        "name": "displayName", 
+        "displayName": "name", 
+        "type": "string"
+    })
+
+    // Type
+    properties.push({
+        "name": "type", 
+        "displayName": "type", 
+        "type": "dropdown", 
+        "values": ["Point", "Sphere", "Line"]
+    })
+
+    // Positions
+    if (object.type == ChargeTypeToInt["Point"] 
+        || ChargeTypeToInt["Sphere"])
+    {
+        properties.push({
+            "name": "x",
+            "displayName": "x",
+            "type": "float",
+        })
+
+        properties.push({
+            "name": "y",
+            "displayName": "y",
+            "type": "float",
+        })
+
+        properties.push({
+            "name": "q",
+            "displayName": "q",
+            "type": "float",
+        })
+    }
+
+    switch (object.type)
+    {
+        case ChargeTypeToInt["Point"]:
+            break;
+
+    }
+
+    return properties
+}   
+
+function updateSelectedObject()
+{
+    objectsList.updateSelected(selectedObject)
+    const simulation = simulationsData[getSelectedSimulation()]
+    objectProperties.updateObject(selectedObject?simulation.objects[selectedObject]:null)
+}
+
+function updateObjectProperties(property, value)
+{
+    const simulation = simulationsData[getSelectedSimulation()]
+    const object = simulation.objects[selectedObject]
+    object[property] = value
+    objectProperties.updateObject(selectedObject?simulation.objects[selectedObject]:null)
+    reloadSim()
+}
+
 function selectObjectListItem(key)
 {
-
+    selectedObject = key==selectedObject?null:key
+    updateSelectedObject()
 }
 
 function updateSelected(nselected)
@@ -223,9 +294,15 @@ objectsList.setItemActions([{
     "fun": (key) => removeObject(key)
 }])
 
+objectsList.setMainAction(selectObjectListItem)
+
+objectProperties.setGetProperties(getObjectProperties)
+objectProperties.setOnUpdate(updateObjectProperties)
+
 objectsPage.addItem(objectsActionBar)
 objectsPage.addItem(objectsList)
 objectsPage.addItem(objectPropertiesActionBar)
+objectsPage.addItem(objectProperties)
 
 sideBar.addPage(simulationsPage)
 sideBar.addPage(objectsPage)
