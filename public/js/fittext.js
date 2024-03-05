@@ -17,6 +17,7 @@ const fitText = function (el, xKompressor, yKompressor, options) {
             minFontSize: -1 / 0,
             maxFontSize: 1 / 0,
             font: "monospace",
+            property: "innerText"
         },
         options
     );
@@ -36,7 +37,8 @@ const fitText = function (el, xKompressor, yKompressor, options) {
             // 16px is the test value because it scales linearly
             const test_val = 16;
             context.font = `${test_val}px ${settings.font}`;
-            const measure = context.measureText(el.innerHTML);
+            console.log(width, height, el[settings.property])
+            const measure = context.measureText(el[settings.property]);
             const measureH =
                 measure.actualBoundingBoxAscent +
                 measure.actualBoundingBoxDescent;

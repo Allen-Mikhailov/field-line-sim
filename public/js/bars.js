@@ -263,6 +263,8 @@ class SideBarProperties
                         els["label"] = label
                         propertyContainer.appendChild(label)
 
+                        fitText(label, .8, .6)
+
                         const input = document.createElement("input")
                         input.type = "number"
                         input.className = "property-float"
@@ -275,6 +277,8 @@ class SideBarProperties
                         })
                         els["input"] = input
                         propertyContainer.appendChild(input)
+
+                        fitText(input, .8, .8, {property: "value"})
 
                         break;
                 }
