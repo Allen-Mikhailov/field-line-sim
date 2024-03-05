@@ -278,7 +278,7 @@ class SideBarProperties
                         els["input"] = input
                         propertyContainer.appendChild(input)
 
-                        fitText(input, .8, .8, {property: "value"})
+                        fitText(input, .8, .6, {property: "value"})
 
                         break;
                 }

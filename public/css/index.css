@@ -461,13 +461,14 @@ body {
     justify-content: center;
     width: 100%;
     height: var(--item-space);
+    border-bottom: var(--border-width) solid var(--background-color);
 }
 
 .property-label {
     height: 100%;
-    min-width: 25%;
-    margin-left: 5%;
-    margin-right: 5%;
+    /* width: calc(var(--main-side-bar-space) *.25); */
+    /* margin-left: 5%;
+    margin-right: 5%; */
     flex: 1;
 
     display: flex;
@@ -479,8 +480,12 @@ body {
 .property-float {
     background-color: transparent;
     height: 100%;
-    flex: 1;
-    max-width: 90%;
+    flex: 4;
+    /* max-width: 90%; */
+
+    display: flex;
+
+    min-width: 0px;
 
     padding: 0px;
     padding-block: 0px;
