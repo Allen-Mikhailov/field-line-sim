@@ -12,7 +12,7 @@ import {
     Tab 
 } from "./bars.js"
 
-import fitText from "./fittext.js"
+import {fitText} from "./fittext.js"
 import { updateCharges, isInitialized, ChargeTypeToInt, IntToChargeType } from "./index.js"
 
 // Getting Data
@@ -193,7 +193,7 @@ function getObjectProperties(object)
     // Name
     properties.push({
         "name": "displayName", 
-        "displayName": "name", 
+        "displayName": "Name", 
         "type": "string"
     })
 

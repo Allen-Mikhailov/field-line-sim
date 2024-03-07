@@ -454,7 +454,7 @@ body {
     border-top: var(--border-width) solid var(--select-border-color);
 }
 
-.float-container {
+.property-container {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -475,9 +475,11 @@ body {
     flex-direction: row;
     justify-content: center;
     align-items: center;
+
+    border-right: var(--border-width) solid var(--background-color);
 }
 
-.property-float {
+.property-string {
     background-color: transparent;
     height: 100%;
     flex: 4;
@@ -486,6 +488,8 @@ body {
     display: flex;
 
     min-width: 0px;
+
+    margin-left: 5%;
 
     padding: 0px;
     padding-block: 0px;

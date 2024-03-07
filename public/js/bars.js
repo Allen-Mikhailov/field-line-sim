@@ -1,4 +1,4 @@
-import fitText from "./fittext.js"
+import {fitText} from "./fittext.js"
 
 const tabBar = document.getElementById("tab-bar")
 const toolBar = document.getElementById("tool-bar")
@@ -12,8 +12,8 @@ const allsTabContainer = document.getElementById("alls-tab-container")
 const sideBarSelect = document.getElementById("side-bar-select")
 const sideBarPageContainer = document.getElementById("side-bar-page-container")
 
-fitText(document.getElementById("tool-bar-title"), .5)
-fitText(document.getElementById("side-bar-title"), .8)
+fitText(document.getElementById("tool-bar-title"), {scale: .5})
+fitText(document.getElementById("side-bar-title"), {scale: .8})
 
 class SideBarPageActionBar
 {
@@ -43,7 +43,7 @@ class SideBarPageActionBar
             titleEl.innerText = this.title
             container.appendChild(titleEl)
 
-            fitText(titleEl, .7)
+            fitText(titleEl, {scale: .7})
         }
 
         const buttonContainer = document.createElement("div")
@@ -94,17 +94,20 @@ class SideBarList
         Object.keys(this.item_divs).map((key) => {
             if (!this.items[key])
             {
-                this.item_divs[key].remove()
+                Object.keys(this.item_divs[key]).map((objectName) => {
+                    this.item_divs[key][objectName].remove()
+                })
                 delete this.item_divs[key]
             }
         })
 
         // Creating and updating elements
         Object.keys(this.items).map((key) => {
-            let el = this.item_divs[key]
-            if (!el)
+            let els = this.item_divs[key]
+            if (!els)
             {
-                el = document.createElement("div")
+                els = {}
+                const el = document.createElement("div")
                 el.classList.add("side-bar-page-list-item")
 
                 el.onclick = (e) => {
@@ -114,10 +117,10 @@ class SideBarList
 
                 const titleEl = document.createElement("div")
                 titleEl.classList.add("title")
-                titleEl.innerText = this.items[key].displayName
                 el.appendChild(titleEl)
+                els["label"] = titleEl
 
-                fitText(titleEl, .5)
+                fitText(titleEl, {scale: .5})
 
                 const buttonContainer = document.createElement("div")
                 buttonContainer.classList.add("container")
@@ -135,11 +138,13 @@ class SideBarList
                 })
 
                 el.appendChild(buttonContainer)
-
+                els["container"] = el
                 this.el.appendChild(el)
 
-                this.item_divs[key] = el
+                this.item_divs[key] = els
             }
+
+            els["label"].innerText = this.items[key].displayName
         })
     }
 
@@ -181,7 +186,7 @@ class SideBarList
             p.temp_item = null
         }
 
-        fitText(inputElement, .5)
+        fitText(inputElement, {scale: .5})
 
         inputElement.onkeydown = (e) => {
             if (e.key == "Enter")
@@ -235,7 +240,7 @@ class SideBarProperties
     updateObject(object)
     {
         this.object = object
-        const properties = this.get_properties(object)
+        const properties = object==null?[]:this.get_properties(object)
         const propertyStrings = {}
 
         properties.map((property, index) => {
@@ -252,36 +257,43 @@ class SideBarProperties
                     "container": propertyContainer
                 }
 
-                switch(property.type)
+                if (property.type == "string" || property.type == "float")
                 {
-                    case "float":
-                        propertyContainer.className = "float-container"
+                    propertyContainer.className = "property-container"
 
-                        // Label
-                        const label = document.createElement("div")
-                        label.className = "property-label"
-                        els["label"] = label
-                        propertyContainer.appendChild(label)
+                    // Label
+                    const label = document.createElement("div")
+                    label.className = "property-label"
+                    els["label"] = label
+                    propertyContainer.appendChild(label)
 
-                        fitText(label, .8, .6)
+                    fitText(label, {xScale: .8, yScale: .6})
+                    const input = document.createElement("input")
 
-                        const input = document.createElement("input")
+                    if (property.type == "string")
+                        input.type = "string"
+                    else
                         input.type = "number"
-                        input.className = "property-float"
-                        input.onblur = ((e) => {
-                            this.on_update(property.name, parseFloat(input.value))
-                        })
-                        input.onkeydown = ((e) => {
-                            if (e.key == "Enter")
-                                input.blur()
-                        })
-                        els["input"] = input
-                        propertyContainer.appendChild(input)
+                    
+                    input.className = "property-string"
+                    input.onblur = ((e) => {
+                        let passedValue = input.value
+                        if (property.type == "float")
+                            passedValue = parseFloat(input.value)
 
-                        fitText(input, .8, .6, {property: "value"})
+                        this.on_update(property.name, passedValue)
+                    })
+                    input.onkeydown = ((e) => {
+                        if (e.key == "Enter")
+                            input.blur()
+                    })
+                    els["input"] = input
+                    propertyContainer.appendChild(input)
 
-                        break;
+                    fitText(input, {xScale: .8, yScale: .6, property: "value"})
                 }
+
+                
                 
                 this.propertyEls[string] = els
                 this.el.appendChild(propertyContainer)
@@ -290,6 +302,10 @@ class SideBarProperties
             switch (property.type)
             {
                 case "float":
+                    els["label"].innerText = property.displayName
+                    els["input"].value = object[property.name]
+                    break;
+                case "string":
                     els["label"].innerText = property.displayName
                     els["input"].value = object[property.name]
                     break;
@@ -350,7 +366,7 @@ class SideBarPage
             pageSelect.classList.add("side-bar-select-button")
             pageSelect.style.width = `calc(var(--main-side-bar-space) / ${buttons})`
             pageSelect.innerText = this.displayName
-            fitText(pageSelect, .7)
+            fitText(pageSelect, {scale: .7})
 
             pageSelect.onclick = () => {
                 parent.setActivePage(this.name)
@@ -550,7 +566,7 @@ class Tabs
         tabButtonTitle.innerText = tab.displayName
         tabButtonEl.appendChild(tabButtonTitle)
 
-        fitText(tabButtonTitle, 100, .4)
+        fitText(tabButtonTitle, {xScale: 100, yScale: .4})
 
         const tabButtonX = document.createElement("div")
         tabButtonX.classList.add("small-button")
