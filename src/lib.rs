@@ -98,7 +98,8 @@ pub enum ChargeType
 {
     Point,
     Sphere,
-    Line
+    Line,
+    External,
 }
 
 impl ChargeType
@@ -136,10 +137,17 @@ pub struct LineCharge
     a: f32
 }
 
+pub struct ExternalCharge
+{
+    q: f32,
+    a: f32,
+}
+
 pub struct Charges {
     point_charges: Vec<PointCharge>,
     sphere_charges: Vec<SphereCharge>,
     lines_charges: Vec<LineCharge>,
+    extrenal_charges: Vec<ExternalCharge>,
 }
 
 #[wasm_bindgen]
@@ -202,9 +210,14 @@ impl Simulation {
             field.add_self_from_angle(a, mag);
         }
 
-        // Sphere Charges
+        // Line Charges
         for charge in charges.lines_charges.iter() {
             
+        }
+
+        // External Charges
+        for charge in charges.extrenal_charges.iter() {
+            field.add_self_from_angle(charge.a, charge.q);
         }
 
         return field.normalized().to_scale(self.k);
@@ -310,6 +323,12 @@ pub fn add_charge_to_charges(charges: &mut Charges, js_object: &Object)
                 a: get_js_f32(&js_object, "a"),
             });
         }, 
+        ChargeType::External=>{
+            charges.extrenal_charges.push(ExternalCharge {
+                q: get_js_f32(&js_object, "q"),
+                a: get_js_f32(&js_object, "a"),
+            });
+        }
     }
 }
 
@@ -357,13 +376,15 @@ impl Simulation {
             point_charges: Vec::new(),
             lines_charges: Vec::new(),
             sphere_charges: Vec::new(),
+            extrenal_charges: Vec::new(),
         };
 
         for i in 0..arr.length() {
+            console_log!("Trying to add charge {}", i);
             let js_object = arr.get(i).dyn_into::<js_sys::Object>().unwrap();
             add_charge_to_charges(&mut charges, &js_object);
 
-            // console_log!("New Charge {} with a chare of {} a pos of {} {} and a type of {}", i, q, x, y, raw_type);
+            console_log!("New Charge {}", i);
         }
 
         let start_points: Vec<Vector2>;

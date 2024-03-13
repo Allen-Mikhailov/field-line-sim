@@ -95,6 +95,7 @@ class SideBarList
             if (!this.items[key])
             {
                 Object.keys(this.item_divs[key]).map((objectName) => {
+                    console.log("ObjectKey", objectName,  this.item_divs, key)
                     this.item_divs[key][objectName].remove()
                 })
                 delete this.item_divs[key]
@@ -153,7 +154,7 @@ class SideBarList
         this.selected = select
         Object.keys(this.items).map((key) => {
             let el = this.item_divs[key]
-            el.className = `side-bar-page-list-item ${this.selected==key?"selected":""}`
+            el["container"].className = `side-bar-page-list-item ${this.selected==key?"selected":""}`
         })
     }
 
@@ -215,6 +216,37 @@ class SideBarList
 
         parent.pageElement.appendChild(list)
     }
+}
+
+function updateDropdownProperties(sideBarProperties, property, object, els)
+{   
+    els["label"].innerText = property.displayName
+    els["value"].innerText = property.values[object[property.name]] 
+        || ("invalid dropdown value: "+object[property.name])
+
+    Object.keys(property.values).map((key) => {
+        const str = property.values[key]
+
+        let optionDiv = els["option:"+key]
+
+        if (!optionDiv)
+        {
+            optionDiv = document.createElement("div")
+            optionDiv.className = "property-dropdown-item"
+            fitText(optionDiv, {xScale: .8, yScale: .6})
+            optionDiv.onclick = (e) => {
+                // console.log(property.name, key)
+                sideBarProperties.on_update(property.name, parseFloat(key))
+                e.stopPropagation()
+            }
+            els["dropdown-container"].appendChild(optionDiv)
+
+            els["option:"+key] = optionDiv
+        }
+
+        optionDiv.innerText = str
+        optionDiv.className = `property-dropdown-item${key == object[property.name]?" selected":""}`
+    })
 }
 
 class SideBarProperties
@@ -293,6 +325,44 @@ class SideBarProperties
                     fitText(input, {xScale: .8, yScale: .6, property: "value"})
                 }
 
+                if (property.type == "dropdown")
+                {
+                    propertyContainer.className = "property-container"
+
+                    // Label
+                    const label = document.createElement("div")
+                    label.className = "property-label"
+                    els["label"] = label
+                    propertyContainer.appendChild(label)
+
+                    fitText(label, {xScale: .8, yScale: .6})
+                    const dropdown = document.createElement("div")
+                    dropdown.className = "property-dropdown"
+
+                    const dropdownContainer = document.createElement("div")
+                    dropdownContainer.className = "property-dropdown-container"
+                    els["dropdown-container"] = dropdownContainer
+
+
+                    let toggled = false
+
+                    const dropdownValue = document.createElement("div")
+                    dropdownValue.className = "property-dropdown-value"
+                    dropdownValue.onclick = () => {
+                        toggled = !toggled
+                    }
+                    dropdown.appendChild(dropdownValue)
+
+                    fitText(dropdownValue, {xScale: .8, yScale: .6})
+
+                    dropdown.appendChild(dropdownContainer)
+
+                    propertyContainer.appendChild(dropdown)
+
+                    els["value"] = dropdownValue
+
+                    updateDropdownProperties(this, property, object, els)
+                }
                 
                 
                 this.propertyEls[string] = els
@@ -308,6 +378,9 @@ class SideBarProperties
                 case "string":
                     els["label"].innerText = property.displayName
                     els["input"].value = object[property.name]
+                    break;
+                case "dropdown":
+                    updateDropdownProperties(this, property, object, els)
                     break;
             }
         })

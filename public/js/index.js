@@ -280,6 +280,7 @@ init().then(async () => {
 
 function updateCharges(simulation)
 {
+    console.log("Loading Simulation with ", simulation.objects)
     charges = simulation.objects
     update_field_lines()
     render_update()

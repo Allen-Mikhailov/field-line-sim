@@ -45,6 +45,11 @@ const SettingsButton = new MiniSideBarButton("settings", "/imgs/settings.png", "
 
 let updateSimulationList = undefined
 
+var extend = function (obj, ext) {
+    for (var key in ext) if (ext.hasOwnProperty(key)) obj[key] = ext[key];
+    return obj;
+};
+
 function updateSimulationData()
 {
     localStorage.setItem(dataKey, JSON.stringify(simulationsData))
@@ -69,26 +74,38 @@ function createKey() {
     );
 }
 
+const defaultCharge = () => {return {
+    x: 0,
+    y: 0,
+    q: 1,
+    type: 0,
+    a: 0,
+    r: 1,
+    displayName: "default"
+}}
+
 function randomCharge(name)
 {
-    return {
+    return extend(defaultCharge(), {
         x: (Math.random()-.5)*2 * 35,
         y: (Math.random()-.5)*2 * 20,
         q: 1,
         type: 0,
         displayName: name
-    }
+    })
 }
 
 function createDefaultObjects(simulation)
 {
-    simulation.objects["Neg 1"] = {
+    simulation.objects["Neg 1"] = extend(defaultCharge(), {
         x: 0,
         y: 0,
         q: -1,
         type: 0,
+        a: 0,
+        r: 0,
         displayName: "Neg 1"
-    }
+    })
     
     for (let i = 0; i < 3; i++)
     {
@@ -202,7 +219,7 @@ function getObjectProperties(object)
         "name": "type", 
         "displayName": "type", 
         "type": "dropdown", 
-        "values": ["Point", "Sphere", "Line"]
+        "values": {0: "Point", 1: "Sphere", 2: "Line", 3: "External"}
     })
 
     // Positions
