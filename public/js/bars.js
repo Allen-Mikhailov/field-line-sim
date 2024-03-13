@@ -95,7 +95,7 @@ class SideBarList
             if (!this.items[key])
             {
                 Object.keys(this.item_divs[key]).map((objectName) => {
-                    console.log("ObjectKey", objectName,  this.item_divs, key)
+                    // console.log("ObjectKey", objectName,  this.item_divs, key)
                     this.item_divs[key][objectName].remove()
                 })
                 delete this.item_divs[key]

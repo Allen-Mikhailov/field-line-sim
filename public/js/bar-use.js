@@ -141,6 +141,14 @@ function createNewObject(name)
 
 function removeSimulation(name)
 {
+    console.log(name)
+    Object.keys(tabs.tabs).map(key => {
+        console.log(key, name)
+        if (key == "simulation:"+name)
+        {
+            tabs.removeTab(tabs.tabs[key])
+        }
+    })
     delete simulationsData[name]
     updateSimulationData()
 }
