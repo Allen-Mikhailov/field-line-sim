@@ -63,9 +63,16 @@ function getSelectedSimulation()
 
 function reloadSim()
 {
-    objectsList.updateItems(simulationsData[getSelectedSimulation()].objects)
-    updateCharges(simulationsData[getSelectedSimulation()])
+    const simulation = simulationsData[getSelectedSimulation()]
+    objectsList.updateItems(simulation.objects)
+    objectProperties.updateObject(selectedObject?simulation.objects[selectedObject]:null)
+    updateCharges(simulation)
     updateSimulationData()
+}
+
+function switchTabs()
+{
+    
 }
 
 function createKey() {
