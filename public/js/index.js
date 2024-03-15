@@ -8,10 +8,11 @@ const decor_canvas = document.getElementById("decor-canvas")
 const ChargeTypeToInt = {
     "Point": 0,
     "Sphere": 1,
-    "Line": 2
+    "Line": 2,
+    "External": 3
 }
 
-const IntToChargeType = ["Point", "Sphere", "Line"]
+const IntToChargeType = ["Point", "Sphere", "Line", "External"]
 
 import init, { Simulation, Vector2 } from "/pkg/field_line_sim.js";
 

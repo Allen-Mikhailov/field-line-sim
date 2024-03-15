@@ -110,6 +110,7 @@ impl ChargeType
             0 => return ChargeType::Point,
             1 => return ChargeType::Sphere,
             2 => return ChargeType::Line,
+            3 => return ChargeType::External,
             _ => return ChargeType::Point
         }
     }
@@ -380,11 +381,11 @@ impl Simulation {
         };
 
         for i in 0..arr.length() {
-            console_log!("Trying to add charge {}", i);
+            // console_log!("Trying to add charge {}", i);
             let js_object = arr.get(i).dyn_into::<js_sys::Object>().unwrap();
             add_charge_to_charges(&mut charges, &js_object);
 
-            console_log!("New Charge {}", i);
+            // console_log!("New Charge {}", i);
         }
 
         let start_points: Vec<Vector2>;
