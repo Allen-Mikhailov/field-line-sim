@@ -551,15 +551,26 @@ body {
     /* background-color: red; */
 }
 
-.charge {
+.point-charge {
     position: absolute;
     border-radius: 50%;
     border-style: dashed;
 
     box-sizing: border-box;
     translate: -50% -50%;
+}
 
-    transition: scale .5s;
+.sphere-charge {
+    position: absolute;
+    border-radius: 50%;
+    /* border-style: dashed; */
+
+    /* box-sizing: border-box; */
+    translate: -50% -50%;
+}
+
+.charge {
+    transition: all .5s;
 }
 
 .charge:hover {

@@ -108,26 +108,46 @@ function drawCharges()
         charge_check[div_key] = true
         let div = charge_divs[div_key]
 
+        let screen_pos
+
         switch (obj.type)
         {
             case ChargeTypeToInt['Point']:
                 if (!div)
                 {
                     div = document.createElement("div")
-                    div.className = "charge"
+                    div.className = "point-charge charge"
 
                     charge_divs[div_key] = div
                     charge_div_container.appendChild(div)
                     CreateChargeDiv(key, div)
                 }
 
+                screen_pos = getScreenPos(obj.x, obj.y)
+
                 div.style.borderColor = obj.q > 0? "blue":"red"
                 div.style.width  = (point_charge_size*2)+"px"
                 div.style.height = (point_charge_size*2)+"px"
-                const screen_pos = getScreenPos(obj.x, obj.y)
+                div.style.left = screen_pos[0]+"px"
+                div.style.top = screen_pos[1]+"px"
+                
+                break;
+            case ChargeTypeToInt['Sphere']:
+                if (!div)
+                {
+                    div = document.createElement("div")
+                    div.className = "sphere-charge charge"
 
-                // console.log(screen_pos)
+                    charge_divs[div_key] = div
+                    charge_div_container.appendChild(div)
+                    CreateChargeDiv(key, div)
+                }
 
+                screen_pos = getScreenPos(obj.x, obj.y)
+
+                div.style.backgroundColor = obj.q > 0? "blue":"red"
+                div.style.width  = (point_charge_size*2)+"px"
+                div.style.height = (point_charge_size*2)+"px"
                 div.style.left = screen_pos[0]+"px"
                 div.style.top = screen_pos[1]+"px"
                 
