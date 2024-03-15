@@ -105,7 +105,7 @@ function createDefaultObjects(simulation)
         q: -1,
         type: 0,
         a: 0,
-        r: 0,
+        r: 1,
         displayName: "Neg 1"
     })
     
@@ -245,6 +245,16 @@ function getObjectProperties(object)
         properties.push({
             "name": "a",
             "displayName": "angle",
+            "type": "float",
+        })
+    }
+
+    // Radius
+    if (object.type == ChargeTypeToInt["Sphere"])
+    {
+        properties.push({
+            "name": "r",
+            "displayName": "radius",
             "type": "float",
         })
     }

@@ -205,7 +205,7 @@ impl Simulation {
         }
 
         // Sphere Charges
-        for charge in charges.point_charges.iter() {
+        for charge in charges.sphere_charges.iter() {
             let a: f32   = f32::atan2(pos.y-charge.pos.y, pos.x-charge.pos.x);
             let mag: f32 = charge.q/f32::hypot(pos.y-charge.pos.y, pos.x-charge.pos.x);
             field.add_self_from_angle(a, mag);
