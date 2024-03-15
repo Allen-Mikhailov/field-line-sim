@@ -237,9 +237,27 @@ function getObjectProperties(object)
         "values": {0: "Point", 1: "Sphere", 2: "Line", 3: "External"}
     })
 
+    properties.push({
+        "name": "q",
+        "displayName": "q",
+        "type": "float",
+    })
+
+    // Angles
+    if (object.type == ChargeTypeToInt["Line"]
+        || object.type == ChargeTypeToInt["External"])
+    {
+        properties.push({
+            "name": "a",
+            "displayName": "angle",
+            "type": "float",
+        })
+    }
+
     // Positions
     if (object.type == ChargeTypeToInt["Point"] 
-        || ChargeTypeToInt["Sphere"])
+        || object.type == ChargeTypeToInt["Sphere"]
+        || object.type == ChargeTypeToInt["Line"])
     {
         properties.push({
             "name": "x",
@@ -250,12 +268,6 @@ function getObjectProperties(object)
         properties.push({
             "name": "y",
             "displayName": "y",
-            "type": "float",
-        })
-
-        properties.push({
-            "name": "q",
-            "displayName": "q",
             "type": "float",
         })
     }
