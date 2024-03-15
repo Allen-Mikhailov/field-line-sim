@@ -237,7 +237,7 @@ function updateDropdownProperties(sideBarProperties, property, object, els)
             optionDiv.onclick = (e) => {
                 // console.log(property.name, key)
                 sideBarProperties.on_update(property.name, parseFloat(key))
-                e.stopPropagation()
+                // e.stopPropagation()
             }
             els["dropdown-container"].appendChild(optionDiv)
 
@@ -341,17 +341,33 @@ class SideBarProperties
 
                     const dropdownContainer = document.createElement("div")
                     dropdownContainer.className = "property-dropdown-container"
+                    dropdownContainer.style.display = "none"
                     els["dropdown-container"] = dropdownContainer
 
 
-                    let toggled = false
+                    let toggled
+                    function updateToggle(newToggle)
+                    {
+                        toggled = newToggle
+                        dropdownContainer.style.display = toggled?"block":"none"
+                    }
+                    updateToggle(false)
 
                     const dropdownValue = document.createElement("div")
                     dropdownValue.className = "property-dropdown-value"
                     dropdownValue.onclick = () => {
-                        toggled = !toggled
+                        updateToggle(!toggled)
+                        if (toggled)
+                        {
+                            dropdownContainer.focus()
+                        }
                     }
                     dropdown.appendChild(dropdownValue)
+
+                    dropdownContainer.onclick = (e) => {
+                        updateToggle(false)
+                        e.stopPropagation()
+                    }
 
                     fitText(dropdownValue, {xScale: .8, yScale: .6})
 
