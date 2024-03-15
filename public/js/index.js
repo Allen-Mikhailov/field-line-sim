@@ -101,35 +101,44 @@ function drawArrow(context, sx, sy, angle, style)
 
 function drawCharges()
 {
+    const charge_check = {}
     Object.keys(charges).map((key) => {
         const obj = charges[key]
-        let div = charge_divs[key]
-        if (!div)
+        const div_key = key+":"+obj.type
+        charge_check[div_key] = true
+        let div = charge_divs[div_key]
+
+        switch (obj.type)
         {
-            div = document.createElement("div")
-            div.className = "charge"
+            case ChargeTypeToInt['Point']:
+                if (!div)
+                {
+                    div = document.createElement("div")
+                    div.className = "charge"
 
-            charge_divs[key] = div
-            charge_div_container.appendChild(div)
-            CreateChargeDiv(key, div)
+                    charge_divs[div_key] = div
+                    charge_div_container.appendChild(div)
+                    CreateChargeDiv(key, div)
+                }
+
+                div.style.borderColor = obj.q > 0? "blue":"red"
+                div.style.width  = (point_charge_size*2)+"px"
+                div.style.height = (point_charge_size*2)+"px"
+                const screen_pos = getScreenPos(obj.x, obj.y)
+
+                // console.log(screen_pos)
+
+                div.style.left = screen_pos[0]+"px"
+                div.style.top = screen_pos[1]+"px"
+                
+                break;
         }
-
-        div.style.borderColor = obj.q > 0? "blue":"red"
-        div.style.width  = (point_charge_size*2)+"px"
-        div.style.height = (point_charge_size*2)+"px"
-        const screen_pos = getScreenPos(obj.x, obj.y)
-
-        // console.log(screen_pos)
-
-        div.style.left = screen_pos[0]+"px"
-        div.style.top = screen_pos[1]+"px"
     })
 
     Object.keys(charge_divs).map((key) => {
-        const obj = charges[key] 
         const div = charge_divs[key]
 
-        if (!obj)
+        if (!charge_check[key])
         {
             div.remove()
             delete charge_divs[key]
