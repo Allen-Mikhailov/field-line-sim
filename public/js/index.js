@@ -30,9 +30,6 @@ let step_distance = .05
 let record_points = 60
 let record_steps = 20
 
-const k = 1 //8.99 * Math.pow(10, 9)
-const nano = Math.pow(10, -9)
-
 const point_charge_size = 30
 let point_charge_start = .01//point_charge_size/unitPerPixel
 const charge_density = 10
@@ -146,8 +143,8 @@ function drawCharges()
                 screen_pos = getScreenPos(obj.x, obj.y)
 
                 div.style.backgroundColor = obj.q > 0? "blue":"red"
-                div.style.width  = (point_charge_size*2)+"px"
-                div.style.height = (point_charge_size*2)+"px"
+                div.style.width  = (unitPerPixel*obj.r*2)+"px"
+                div.style.height = (unitPerPixel*obj.r*2)+"px"
                 div.style.left = screen_pos[0]+"px"
                 div.style.top = screen_pos[1]+"px"
                 
