@@ -98,6 +98,13 @@ function drawArrow(context, sx, sy, angle, style)
 
 }
 
+let OnChargeClick
+
+function setOnChargeClick(funct)
+{
+    OnChargeClick = funct
+}
+
 function drawCharges()
 {
     const charge_check = {}
@@ -120,6 +127,8 @@ function drawCharges()
                     div.innerText = obj.displayName
                     fitText(div, {scale: .7})
 
+                    div.onclick = () => OnChargeClick(div, obj, key)
+
                     charge_divs[div_key] = div
                     charge_div_container.appendChild(div)
                     CreateChargeDiv(key, div)
@@ -141,6 +150,8 @@ function drawCharges()
                     div.className = "sphere-charge charge"
                     div.innerText = obj.displayName
                     fitText(div, {scale: .7})
+
+                    div.onclick = () => OnChargeClick(div, obj, key)
 
                     charge_divs[div_key] = div
                     charge_div_container.appendChild(div)
@@ -325,4 +336,4 @@ function isInitialized()
     return initialized
 }
 
-export {updateCharges, isInitialized, ChargeTypeToInt, IntToChargeType}
+export {updateCharges, isInitialized, ChargeTypeToInt, IntToChargeType, setOnChargeClick}
