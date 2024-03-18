@@ -482,7 +482,7 @@ body {
 .property-string {
     background-color: transparent;
     height: 100%;
-    flex: 4;
+    flex: 1;
     /* max-width: 90%; */
 
     display: flex;

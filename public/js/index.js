@@ -32,9 +32,9 @@ let step_distance = .05
 let record_points = 60
 let record_steps = 20
 
-const point_charge_size = 30
+let point_charge_size = 30
 let point_charge_start = .01//point_charge_size/unitPerPixel
-const charge_density = 10
+let charge_density = 10
 const close_spawn_distance = .055
 
 const arrow_frequency = 10
@@ -187,9 +187,25 @@ function clearContext(context)
     context.clearRect(0, 0, width, height);
 }
 
+const vaildCharges = {
+    "0": true,
+    "1": true,
+    "2": true,
+    "3": true
+}
+
 function update_field_lines()
 {
     const point_charge_distance = close_spawn_distance//point_charge_size/unitPerPixel
+
+    if (charges["settings"])
+    {
+        record_points = charges["settings"].record_points
+        step_distance = charges["settings"].step_distance
+        record_steps = charges["settings"].record_steps
+        charge_density = charges["settings"].charge_density
+    }
+
     const simulation = new Simulation(
         record_points, 
         step_distance, 
@@ -201,7 +217,8 @@ function update_field_lines()
 
     const charge_array = []
     Object.keys(charges).map((key) => {
-        charge_array.push(charges[key])
+        if (vaildCharges[charges[key].type])
+            charge_array.push(charges[key])
     })
 
     let start = Date.now()

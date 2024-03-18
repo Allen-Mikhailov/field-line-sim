@@ -94,8 +94,8 @@ const defaultCharge = () => {return {
 function randomCharge(name)
 {
     return extend(defaultCharge(), {
-        x: (Math.random()-.5)*2 * 35,
-        y: (Math.random()-.5)*2 * 20,
+        x: Math.floor((Math.random()-.5)*2 * 35),
+        y: Math.floor((Math.random()-.5)*2 * 20),
         q: 1,
         type: 0,
         displayName: name
@@ -124,11 +124,15 @@ function createNewSimulation(name)
 {
     const newSimulation = {
         "displayName": name,
-        "settings": {
-
-        },
         "objects": {
-
+            "settings": {
+                type: "settings",
+                displayName: "settings",
+                charge_density: 10,
+                record_points: 60,
+                record_steps: 20,
+                step_distance: .05
+            }
         }
     }
 
@@ -218,76 +222,82 @@ function selectListItem(key)
     }
 }
 
-function getObjectProperties(object)
-{
-    const properties = []
-    
-    // Name
-    properties.push({
+const propertyList = {
+    displayName: {
         "name": "displayName", 
         "displayName": "Name", 
         "type": "string"
-    })
-
-    // Type
-    properties.push({
+    },
+    chargeType: {
         "name": "type", 
         "displayName": "type", 
         "type": "dropdown", 
         "values": {0: "Point", 1: "Sphere", 2: "Line", 3: "External"}
-    })
-
-    properties.push({
+    },
+    charge: {
         "name": "q",
-        "displayName": "q",
+        "displayName": "charge",
         "type": "float",
+    },
+    angle: {
+        "name": "a",
+        "displayName": "angle",
+        "type": "float",
+    },
+    radius: {
+        "name": "r",
+        "displayName": "radius",
+        "type": "float",
+    },
+    x: {
+        "name": "x",
+        "displayName": "x",
+        "type": "float",
+    },
+    y: {
+        "name": "y",
+        "displayName": "y",
+        "type": "float",
+    },
+    record_points: {
+        "name": "record_points",
+        "displayName": "Record Points",
+        "type": "float"
+    },
+    step_distance: {
+        "name": "step_distance",
+        "displayName": "Step Distance",
+        "type": "float"
+    },
+    record_steps: {
+        "name": "record_steps",
+        "displayName": "Record Steps",
+        "type": "float"
+    },
+    charge_density: {
+        "name": "charge_density",
+        "displayName": "Charge Density",
+        "type": "float"
+    }
+}
+
+const typeProperties = {
+    [ChargeTypeToInt["Point"]]: ["displayName", "chargeType", "charge", "x", "y"],
+    [ChargeTypeToInt["Sphere"]]: ["displayName", "chargeType", "charge", "radius", "x", "y"],
+    [ChargeTypeToInt["Line"]]: ["displayName", "chargeType", "charge", "x", "y"],
+    [ChargeTypeToInt["External"]]: ["displayName", "chargeType", "charge", "angle"],
+    ["settings"]: ["record_points", "record_steps", "step_distance", "charge_density"]
+}
+
+console.log("typeProperties", typeProperties)
+
+function getObjectProperties(object)
+{
+    const properties = []
+    
+    typeProperties[""+object.type].map((property) => {
+        properties.push(propertyList[property])
     })
-
-    // Angles
-    if (object.type == ChargeTypeToInt["Line"]
-        || object.type == ChargeTypeToInt["External"])
-    {
-        properties.push({
-            "name": "a",
-            "displayName": "angle",
-            "type": "float",
-        })
-    }
-
-    // Radius
-    if (object.type == ChargeTypeToInt["Sphere"])
-    {
-        properties.push({
-            "name": "r",
-            "displayName": "radius",
-            "type": "float",
-        })
-    }
-
-    // Positions
-    if (object.type == ChargeTypeToInt["Point"] 
-        || object.type == ChargeTypeToInt["Sphere"]
-        || object.type == ChargeTypeToInt["Line"])
-    {
-        properties.push({
-            "name": "x",
-            "displayName": "x",
-            "type": "float",
-        })
-
-        properties.push({
-            "name": "y",
-            "displayName": "y",
-            "type": "float",
-        })
-    }
-
-    switch (object.type)
-    {
-        case ChargeTypeToInt["Point"]:
-            break;
-
-    }
 
     return properties
 }   
