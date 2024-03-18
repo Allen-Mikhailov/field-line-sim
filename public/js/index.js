@@ -5,6 +5,8 @@ const charge_div_container = document.getElementById("charge-container")
 const canvas = document.getElementById("line-canvas")
 const decor_canvas = document.getElementById("decor-canvas")
 
+import { fitText } from "./fittext.js"
+
 const ChargeTypeToInt = {
     "Point": 0,
     "Sphere": 1,
@@ -100,6 +102,7 @@ function drawCharges()
 {
     const charge_check = {}
     Object.keys(charges).map((key) => {
+        console.log("chargekey", key)
         const obj = charges[key]
         const div_key = key+":"+obj.type
         charge_check[div_key] = true
@@ -114,6 +117,8 @@ function drawCharges()
                 {
                     div = document.createElement("div")
                     div.className = "point-charge charge"
+                    div.innerText = obj.displayName
+                    fitText(div, {scale: .7})
 
                     charge_divs[div_key] = div
                     charge_div_container.appendChild(div)
@@ -134,6 +139,8 @@ function drawCharges()
                 {
                     div = document.createElement("div")
                     div.className = "sphere-charge charge"
+                    div.innerText = obj.displayName
+                    fitText(div, {scale: .7})
 
                     charge_divs[div_key] = div
                     charge_div_container.appendChild(div)
