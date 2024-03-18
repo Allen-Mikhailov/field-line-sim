@@ -13,7 +13,12 @@ import {
 } from "./bars.js"
 
 import {fitText} from "./fittext.js"
-import { updateCharges, isInitialized, ChargeTypeToInt, IntToChargeType } from "./index.js"
+import { updateCharges, 
+    isInitialized, 
+    ChargeTypeToInt, 
+    IntToChargeType, 
+    setOnChargeClick 
+} from "./index.js"
 
 // Getting Data
 const dataKey = "simulation-data:0.0"
@@ -308,6 +313,10 @@ function selectObjectListItem(key)
     selectedObject = key==selectedObject?null:key
     updateSelectedObject()
 }
+
+setOnChargeClick((div, obj, key) => {
+    selectObjectListItem(key)
+})
 
 function updateSelected(nselected)
 {
