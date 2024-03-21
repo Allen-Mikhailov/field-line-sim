@@ -234,6 +234,11 @@ const propertyList = {
         "type": "dropdown", 
         "values": {0: "Point", 1: "Sphere", 2: "Line", 3: "External"}
     },
+    active: {
+        "name": "active", 
+        "displayName": "active", 
+        "type": "toggle"
+    },
     charge: {
         "name": "q",
         "displayName": "charge",
@@ -281,11 +286,13 @@ const propertyList = {
     }
 }
 
+const baseCharge = ["displayName", "chargeType", "active", "charge"]
+
 const typeProperties = {
-    [ChargeTypeToInt["Point"]]: ["displayName", "chargeType", "charge", "x", "y"],
-    [ChargeTypeToInt["Sphere"]]: ["displayName", "chargeType", "charge", "radius", "x", "y"],
-    [ChargeTypeToInt["Line"]]: ["displayName", "chargeType", "charge", "x", "y"],
-    [ChargeTypeToInt["External"]]: ["displayName", "chargeType", "charge", "angle"],
+    [ChargeTypeToInt["Point"]]: [...baseCharge, "x", "y"],
+    [ChargeTypeToInt["Sphere"]]: [...baseCharge, "radius", "x", "y"],
+    [ChargeTypeToInt["Line"]]: [...baseCharge, "x", "y"],
+    [ChargeTypeToInt["External"]]: [...baseCharge, "angle"],
     ["settings"]: ["record_points", "record_steps", "step_distance", "charge_density"]
 }
 

@@ -380,6 +380,36 @@ class SideBarProperties
                     updateDropdownProperties(this, property, object, els)
                 }
                 
+                if (property.type == "toggle")
+                {
+                    propertyContainer.className = "property-container"
+
+                    // Label
+                    const label = document.createElement("div")
+                    label.className = "property-label"
+                    els["label"] = label
+                    propertyContainer.appendChild(label)
+
+                    const box = document.createElement("div")
+                    box.className = "property-toggle-container"
+
+                    const checkBox = document.createElement("div")
+                    checkBox.className = "property-toggle-box"
+
+                    const check = document.createElement("div")
+                    check.className = "property-toggle-check"
+                    checkBox.appendChild(check)
+
+                    els["check"] = check
+
+                    checkBox.onclick = () => {
+                        this.on_update(property.name, !object[property.name])
+                    }
+
+                    box.appendChild(checkBox)
+
+                    propertyContainer.appendChild(box)
+                }
                 
                 this.propertyEls[string] = els
                 this.el.appendChild(propertyContainer)
@@ -397,6 +427,10 @@ class SideBarProperties
                     break;
                 case "dropdown":
                     updateDropdownProperties(this, property, object, els)
+                    break;
+                case "toggle":
+                    els["label"].innerText = property.displayName
+                    els["check"].className = `property-toggle-check ${object[property.name]?"selected":""}`
                     break;
             }
         })
