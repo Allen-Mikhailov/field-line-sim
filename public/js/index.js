@@ -109,7 +109,6 @@ function drawCharges()
 {
     const charge_check = {}
     Object.keys(charges).map((key) => {
-        console.log("chargekey", key)
         const obj = charges[key]
         const div_key = key+":"+obj.type
         charge_check[div_key] = true
