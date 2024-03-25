@@ -190,6 +190,20 @@ impl Simulation {
             
         }
 
+        for charge in charges.sphere_charges.iter()
+        {
+            let point_count = self.get_field_line_count(charge.q);
+            for i in 0..point_count
+            {
+                let a: f32 = 2f32 * PI * (i as f32) / point_count as f32;
+                points.push(Vector2 {
+                    x: charge.pos.x + a.cos() * charge.r,
+                    y: charge.pos.y + a.sin() * charge.r,
+                })
+            }
+            
+        }
+
         return points;
     }
 
@@ -286,8 +300,55 @@ impl Simulation {
 
 pub fn get_js_f32(js_object: &Object, name: &str) -> f32
 {
-    unsafe {
-        return Reflect::get(&js_object, &JsValue::from_str(name)).unwrap().as_f64().unwrap() as f32;
+    match Reflect::get(&js_object, &JsValue::from_str(name)) {
+        Ok(n) => {
+            match n.as_f64() {
+                Some(n2) => {
+                    return n2 as f32;
+                },
+                None => {
+                    console_log!("ERROR: Invalid f32 named \"{}\"", name);
+                    return 0f32;
+                }
+            }
+        },
+        Err(_e) => {
+            console_log!("ERROR: Invalid f32 named \"{}\"", name);
+            return 0f32;
+        }
+    }
+}
+
+pub fn get_js_u32(js_object: &Object, name: &str) -> u32
+{
+    match Reflect::get(&js_object, &JsValue::from_str(name)) {
+        Ok(n) => {
+            match n.as_f64() {
+                Some(n2) => {
+                    return n2 as u32;
+                },
+                None => {
+                    console_log!("ERROR: Invalid u32 named \"{}\"", name);
+                    return 0u32;
+                }
+            }
+        },
+        Err(_e) => {
+            console_log!("ERROR: Invalid u32 named \"{}\"", name);
+            return 0u32;
+        }
+    }
+}
+
+pub fn get_js_bool(js_object: &Object, name: &str) -> Option<bool>
+{
+    match Reflect::get(&js_object, &JsValue::from_str(name)) {
+        Ok(n) => {
+            return n.as_bool();
+        },
+        Err(_e) => {
+            return None;
+        }
     }
 }
 
@@ -301,7 +362,20 @@ pub fn get_js_vector2(js_object: &Object) -> Vector2
 
 pub fn add_charge_to_charges(charges: &mut Charges, js_object: &Object)
 {
-    let raw_type: u32 = unsafe {Reflect::get(&js_object, &JsValue::from_str("type")).unwrap().as_f64().unwrap() as u32};
+    let raw_type: u32 = get_js_u32(js_object, "type");
+
+    let is_active = get_js_bool(js_object, "active");
+    match is_active {
+        Some(n) => {
+            if !n {
+                return;
+            }
+        },
+        None => {
+            console_log!("WARNING: Setting \"active\" not found");
+        }
+    }
+
     let charge_type: ChargeType = ChargeType::from_raw(raw_type);
     match charge_type {
         ChargeType::Point=>{

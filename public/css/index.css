@@ -538,6 +538,35 @@ body {
     justify-content: center;
 }
 
+.property-toggle-container {
+    flex: .5;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.property-toggle-box {
+    height: 60%;
+    aspect-ratio: 1;
+
+    border-radius: 10%;
+    border: 2px solid var(--font-color);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.property-toggle-check {
+    border-radius: 10%;
+
+    height: 80%;
+    aspect-ratio: 1;
+    background-color: var(--font-color);
+}
+
 .canvas {
     height: 100%;
     width: 100%;
@@ -549,6 +578,18 @@ body {
     overflow: hidden;
 
     /* background-color: red; */
+}
+
+#simulation-time-display {
+    position: absolute;
+    left: 1vw;
+    bottom: 1vw;
+
+    width: 15%;
+    height: 5%;
+
+    display: flex;
+    align-items: flex-end;
 }
 
 .point-charge {

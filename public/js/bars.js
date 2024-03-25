@@ -396,15 +396,13 @@ class SideBarProperties
                     const checkBox = document.createElement("div")
                     checkBox.className = "property-toggle-box"
 
+                    els["checkBox"] = checkBox
+
                     const check = document.createElement("div")
                     check.className = "property-toggle-check"
                     checkBox.appendChild(check)
 
                     els["check"] = check
-
-                    checkBox.onclick = () => {
-                        this.on_update(property.name, !object[property.name])
-                    }
 
                     box.appendChild(checkBox)
 
@@ -430,7 +428,14 @@ class SideBarProperties
                     break;
                 case "toggle":
                     els["label"].innerText = property.displayName
-                    els["check"].className = `property-toggle-check ${object[property.name]?"selected":""}`
+                    els["check"].style.display = object[property.name]?"block":"none"
+
+                    let checkBox = els["checkBox"]
+
+                    checkBox.removeAttribute("onclick");
+                    checkBox.onclick = () => {
+                        this.on_update(property.name, !object[property.name])
+                    }
                     break;
             }
         })

@@ -110,6 +110,7 @@ function createDefaultObjects(simulation)
         q: -1,
         type: 0,
         a: 0,
+        active: true,
         r: 1,
         displayName: "Neg 1"
     })

@@ -1,6 +1,7 @@
 const topbar = document.getElementById("top-bar")
 
 const charge_div_container = document.getElementById("charge-container")
+const simulationTimeDisplay = document.getElementById("simulation-time-display")
 
 const canvas = document.getElementById("line-canvas")
 const decor_canvas = document.getElementById("decor-canvas")
@@ -111,7 +112,6 @@ function drawCharges()
     Object.keys(charges).map((key) => {
         const obj = charges[key]
         const div_key = key+":"+obj.type
-        charge_check[div_key] = true
         let div = charge_divs[div_key]
 
         let screen_pos
@@ -119,6 +119,8 @@ function drawCharges()
         switch (obj.type)
         {
             case ChargeTypeToInt['Point']:
+                if (!obj.active) {return;}
+
                 if (!div)
                 {
                     div = document.createElement("div")
@@ -143,6 +145,7 @@ function drawCharges()
                 
                 break;
             case ChargeTypeToInt['Sphere']:
+                if (!obj.active) {return;}
                 if (!div)
                 {
                     div = document.createElement("div")
@@ -167,6 +170,8 @@ function drawCharges()
                 
                 break;
         }
+
+        charge_check[div_key] = true
     })
 
     Object.keys(charge_divs).map((key) => {
@@ -223,7 +228,7 @@ function update_field_lines()
     let start = Date.now()
     simulation.create_all_field_lines(charge_array);
     field_line_floats = simulation.get_recorded_points();
-    console.log("Calculation time: "+((Date.now()-start)/1000))
+    simulationTimeDisplay.innerText = ""+((Date.now()-start)/1000)+" seconds"
     
 }
 
