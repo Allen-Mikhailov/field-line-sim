@@ -66,11 +66,25 @@ function getSelectedSimulation()
     return (tabs.selectedTab||{}).simulationId
 }
 
-function reloadSim()
+function updateItems()
 {
     const simulation = simulationsData[getSelectedSimulation()]
-    objectsList.updateItems(simulation.objects)
-    objectProperties.updateObject(selectedObject?simulation.objects[selectedObject]:null)
+
+    if (simulation)
+    {
+        objectsList.updateItems(simulation.objects)
+        objectProperties.updateObject(selectedObject?simulation.objects[selectedObject]:null)
+    } else {
+        objectsList.updateItems({})
+        objectProperties.updateObject(null)
+    }
+    
+}
+
+function reloadSim()
+{
+    updateItems()
+    const simulation = simulationsData[getSelectedSimulation()]
     updateCharges(simulation)
     updateSimulationData()
 }
@@ -88,6 +102,7 @@ const defaultCharge = () => {return {
     type: 0,
     a: 0,
     r: 1,
+    active: true,
     displayName: "default"
 }}
 
@@ -109,9 +124,6 @@ function createDefaultObjects(simulation)
         y: 0,
         q: -1,
         type: 0,
-        a: 0,
-        active: true,
-        r: 1,
         displayName: "Neg 1"
     })
     
@@ -201,6 +213,15 @@ class SimulationTab extends Tab
         super.close()
         const simulationTab = document.getElementById("simulation-tab")
         simulationTab.style.display = "none"
+    }
+
+    after_close()
+    {
+        if (!getSelectedSimulation())
+        {
+            console.log("closed")
+            updateItems()
+        }
     }
 
     static createId(key)
@@ -296,8 +317,6 @@ const typeProperties = {
     [ChargeTypeToInt["External"]]: [...baseCharge, "angle"],
     ["settings"]: ["record_points", "record_steps", "step_distance", "charge_density"]
 }
-
-console.log("typeProperties", typeProperties)
 
 function getObjectProperties(object)
 {

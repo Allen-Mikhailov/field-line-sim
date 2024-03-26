@@ -679,6 +679,7 @@ class Tabs
                 newSelect = this.tabs[tabId]
             })
             this.selectRawTab(newSelect)
+            tab.after_close()
         }
     }
 
@@ -747,6 +748,11 @@ class Tab
     {
         if (this.containerEl)
             this.containerEl.remove()
+    }
+
+    after_close()
+    {
+        
     }
 }
 
