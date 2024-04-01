@@ -102,6 +102,7 @@ const defaultCharge = () => {return {
     type: 0,
     a: 0,
     r: 1,
+    l: 10,
     active: true,
     displayName: "default"
 }}
@@ -271,6 +272,11 @@ const propertyList = {
         "displayName": "angle",
         "type": "float",
     },
+    length: {
+        "name": "l",
+        "displayName": "length",
+        "type": "float",
+    },
     radius: {
         "name": "r",
         "displayName": "radius",
@@ -313,7 +319,7 @@ const baseCharge = ["displayName", "chargeType", "active", "charge"]
 const typeProperties = {
     [ChargeTypeToInt["Point"]]: [...baseCharge, "x", "y"],
     [ChargeTypeToInt["Sphere"]]: [...baseCharge, "radius", "x", "y"],
-    [ChargeTypeToInt["Line"]]: [...baseCharge, "x", "y"],
+    [ChargeTypeToInt["Line"]]: [...baseCharge, "x", "y", "angle", "length"],
     [ChargeTypeToInt["External"]]: [...baseCharge, "angle"],
     ["settings"]: ["record_points", "record_steps", "step_distance", "charge_density"]
 }

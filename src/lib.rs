@@ -1,6 +1,7 @@
 // wasm-pack build --target web
 use std::vec;
 use std::f32::consts::PI;
+use js_sys::Math::min;
 use js_sys::Object;
 use js_sys::{Array};
 use wasm_bindgen::JsValue;
@@ -67,6 +68,14 @@ impl Vector2
 
     pub fn sub_from_angle(&mut self, a: f32, mag: f32) -> Vector2
     { return Vector2 { x: self.x - a.cos()*mag, y: self.y - a.sin()*mag}; }
+
+    pub fn rotate(&mut self, a: f32) -> Vector2
+    {
+        return Vector2 {
+            x: self.x * a.cos() + self.y * a.sin(), 
+            y: self.x * a.sin() + self.y * a.cos()
+        };
+    }
 
     pub fn normalized(&self) -> Vector2
     {
@@ -135,7 +144,8 @@ pub struct LineCharge
 {
     pos: Vector2,
     q: f32,
-    a: f32
+    a: f32,
+    l: f32
 }
 
 pub struct ExternalCharge
@@ -164,6 +174,16 @@ pub struct Simulation
     k: f32,
 
     recorded_points: Vec<f32>
+}
+
+pub fn line_field_x(theata1: f32, theata2: f32) -> f32
+{
+    return -(theata2.cos() - theata1.cos());
+}
+
+pub fn line_field_y(theata1: f32, theata2: f32) -> f32
+{
+    return theata2.sin() - theata1.sin();
 }
 
 impl Simulation {
@@ -204,6 +224,29 @@ impl Simulation {
             
         }
 
+        for charge in charges.lines_charges.iter()
+        {
+            let point_count = self.get_field_line_count(charge.q);
+            for i in 0..(point_count/2)
+            {
+                let a: f32 = (i as f32) / ((point_count/2)-1) as f32;
+                let mut vec;
+                vec = Vector2{
+                    x: (a-0.5f32)*charge.l,
+                    y: self.close_spawn_distance
+                };
+                points.push(vec.rotate(charge.a).add(&charge.pos));
+
+
+                let mut vec = Vector2{
+                    x: (a-0.5f32)*charge.l,
+                    y: -self.close_spawn_distance
+                };
+                points.push(vec.rotate(charge.a).add(&charge.pos))
+            }
+            
+        }
+
         return points;
     }
 
@@ -227,7 +270,31 @@ impl Simulation {
 
         // Line Charges
         for charge in charges.lines_charges.iter() {
-            
+            let mut vec: Vector2 = pos.sub(&charge.pos).rotate(-charge.a);
+
+            let a: f32 = vec.y.abs();
+            let a_sign: f32 = vec.y.signum();
+
+            let lambda: f32 = charge.q/charge.l/a;
+
+            if vec.x.abs() < charge.l/2f32
+            {
+                let a1 = (charge.l/2f32+vec.x).atan2(a);
+                let a2 = (charge.l/2f32-vec.x).atan2(a);
+
+                field.add_self(&Vector2 { 
+                    x: lambda*(line_field_x(0f32, a1) - line_field_x(0f32, a2)), 
+                    y: lambda*(line_field_y(0f32, a1) + line_field_y(0f32, a2))*a_sign
+                }.rotate(-charge.a));
+            } else {
+                let a1 = (vec.x-charge.l/2f32).abs().atan2(a);
+                let a2 = (vec.x+charge.l/2f32).abs().atan2(a);
+
+                field.add_self(&Vector2 { 
+                    x: lambda*(line_field_x(a1.min(a2), a1.max(a2)))*vec.x.signum(), 
+                    y: lambda*(line_field_y(a1.min(a2), a1.max(a2))) *a_sign
+                }.rotate(-charge.a));
+            }
         }
 
         // External Charges
@@ -396,6 +463,7 @@ pub fn add_charge_to_charges(charges: &mut Charges, js_object: &Object)
                 pos: get_js_vector2(js_object),
                 q: get_js_f32(&js_object, "q"),
                 a: get_js_f32(&js_object, "a"),
+                l: get_js_f32(&js_object, "l")
             });
         }, 
         ChargeType::External=>{
@@ -463,9 +531,8 @@ impl Simulation {
         }
 
         let start_points: Vec<Vector2>;
-        {
-            start_points = self.get_field_start_points(&charges);
-        }
+        start_points = self.get_field_start_points(&charges);
+        
 
         let float_count: u32 = start_points.len() as u32 * (self.record_points + 1) * 2;
         self.recorded_points.resize(float_count as usize, 0.0f32);

@@ -77,6 +77,21 @@ function getChargeColor(q)
     return q > 0?"#00f":"#f00"
 }
 
+function setDashedBorder(div)
+{
+    let imageString = "url("
+    imageString += `"data:image/svg+xml,%3csvg `
+    imageString += "width='100%25' height='100%25'"
+    imageString += `xmlns='http://www.w3.org/2000/svg'%3e%3crect `
+    imageString += `width='100%25' height='100%25' `
+    imageString += `fill='none' stroke='black' stroke-width='4' `
+    imageString += `stroke-dasharray='50%2c 50' `
+    imageString += `stroke-dashoffset='0' `
+    imageString += `stroke-linecap='square'/%3e%3c/svg%3e`
+    imageString += `")`
+    div.style.backgroundImage = imageString
+}
+
 function drawArrow(context, sx, sy, angle, style)
 {
     const [x, y] = getScreenPos(sx, sy)
@@ -114,7 +129,7 @@ function drawCharges()
         const div_key = key+":"+obj.type
         let div = charge_divs[div_key]
 
-        let screen_pos
+        let screen_pos = getScreenPos(obj.x, obj.y)
 
         switch (obj.type)
         {
@@ -135,13 +150,13 @@ function drawCharges()
                     CreateChargeDiv(key, div)
                 }
 
-                screen_pos = getScreenPos(obj.x, obj.y)
-
                 div.style.borderColor = obj.q > 0? "blue":"red"
                 div.style.width  = (point_charge_size*2)+"px"
                 div.style.height = (point_charge_size*2)+"px"
                 div.style.left = screen_pos[0]+"px"
                 div.style.top = screen_pos[1]+"px"
+
+                // setDashedBorder(div)
                 
                 break;
             case ChargeTypeToInt['Sphere']:
@@ -160,8 +175,6 @@ function drawCharges()
                     CreateChargeDiv(key, div)
                 }
 
-                screen_pos = getScreenPos(obj.x, obj.y)
-
                 div.style.backgroundColor = obj.q > 0? "blue":"red"
                 div.style.width  = (unitPerPixel*obj.r*2)+"px"
                 div.style.height = (unitPerPixel*obj.r*2)+"px"
@@ -169,6 +182,29 @@ function drawCharges()
                 div.style.top = screen_pos[1]+"px"
                 
                 break;
+
+            case ChargeTypeToInt["Line"]:
+                if (!obj.active) {return;}
+                if (!div)
+                {
+                    div = document.createElement("div")
+                    div.className = "line-charge charge"
+                    // div.innerText = obj.displayName
+                    // fitText(div, {scale: .7})
+
+                    div.onclick = () => OnChargeClick(div, obj, key)
+
+                    charge_divs[div_key] = div
+                    charge_div_container.appendChild(div)
+                    CreateChargeDiv(key, div)
+                }
+
+                div.style.backgroundColor = obj.q > 0? "blue":"red"
+                div.style.width  = (unitPerPixel*obj.l)+"px"
+                div.style.height = "3px"
+                div.style.left = screen_pos[0]+"px"
+                div.style.top = screen_pos[1]+"px"
+                div.style.rotate = `${-obj.a}rad`
         }
 
         charge_check[div_key] = true
