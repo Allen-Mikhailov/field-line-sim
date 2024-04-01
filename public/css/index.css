@@ -599,6 +599,8 @@ body {
 
     box-sizing: border-box;
     translate: -50% -50%;
+
+    /* background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='100' ry='100' stroke='%23EC3463' stroke-width='7' stroke-dasharray='22%2c 18' stroke-dashoffset='0' stroke-linecap='butt'/%3e%3c/svg%3e"); */
 }
 
 .sphere-charge {
@@ -607,6 +609,11 @@ body {
     /* border-style: dashed; */
 
     /* box-sizing: border-box; */
+    translate: -50% -50%;
+}
+
+.line-charge {
+    position: absolute;
     translate: -50% -50%;
 }
 
