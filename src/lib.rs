@@ -72,7 +72,7 @@ impl Vector2
     pub fn rotate(&mut self, a: f32) -> Vector2
     {
         return Vector2 {
-            x: self.x * a.cos() + self.y * a.sin(), 
+            x: self.x * a.cos() - self.y * a.sin(), 
             y: self.x * a.sin() + self.y * a.cos()
         };
     }
@@ -285,7 +285,7 @@ impl Simulation {
                 field.add_self(&Vector2 { 
                     x: lambda*(line_field_x(0f32, a1) - line_field_x(0f32, a2)), 
                     y: lambda*(line_field_y(0f32, a1) + line_field_y(0f32, a2))*a_sign
-                }.rotate(-charge.a));
+                }.rotate(charge.a));
             } else {
                 let a1 = (vec.x-charge.l/2f32).abs().atan2(a);
                 let a2 = (vec.x+charge.l/2f32).abs().atan2(a);
@@ -293,7 +293,7 @@ impl Simulation {
                 field.add_self(&Vector2 { 
                     x: lambda*(line_field_x(a1.min(a2), a1.max(a2)))*vec.x.signum(), 
                     y: lambda*(line_field_y(a1.min(a2), a1.max(a2))) *a_sign
-                }.rotate(-charge.a));
+                }.rotate(charge.a));
             }
         }
 
